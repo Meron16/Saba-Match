@@ -35,8 +35,8 @@ export default function SignupForm() {
 
   return (
     <div className="min-h-screen w-full bg-white flex items-center justify-center px-4">
-      {/* Slightly increased width compared to Sign In */}
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-10 md:p-12">
+      {/* Form container with visible border and stronger shadow */}
+      <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-gray-200 p-10 md:p-12">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Account</h1>
