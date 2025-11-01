@@ -1,10 +1,9 @@
-import Contact from "../Components/Home/Contact"
-import { Footer } from "@/Components/Layout/Footer"
+import Dashboard from "@/Components/Dahboards/userdashboard"
+
 export default function ContactPage() {
   return (
     <main className="min-h-screen">
-       <Contact />
-     <Footer />
+      <Dashboard />
     </main>
   )
 }
