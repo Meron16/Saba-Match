@@ -26,10 +26,11 @@ export default function Contact() {
 
   return (
     <section className="relative w-full h-screen bg-white overflow-hidden">
-      <div className="absolute right-0 top-0 w-[35%] h-full bg-gradient-to-b from-[#FF9833] via-[#FF9833] to-[#FF8C1A]"></div>
+      <div className="absolute right-0 top-0 w-[30%] h-full bg-gradient-to-b from-[#FF9833] via-[#FF9833] to-[#FF8C1A]"></div>
 
-      <div className="relative z-10 flex items-center justify-between h-full">
-        <div className="w-[65%] px-20 py-12 flex items-center">
+      <div className="relative z-10 flex items-center h-full">
+        {/* LEFT: Text + Form - now 100% width */}
+        <div className="w-[150%] px-60 py-12 flex items-center">
           <div className="w-full max-w-md">
             <h1 className="text-5xl font-bold mb-4 leading-tight">
               Get in <span className="text-[#FF9833]">Touch</span>
@@ -145,16 +146,11 @@ export default function Contact() {
           </div>
         </div>
 
-        <div className="w-[35%] h-full flex items-center justify-center relative -ml-16">
-   <img
-  src="/contact.png"
-  alt="Orange and black robot in business suit with headphones"
-  className="w-[700px] h-auto object-cover drop-shadow-2xl -ml-40"
-  style={{ alignSelf: "flex-start" }}
-/>
-
-
-        </div>
+        <img
+          src="/contact.png"
+          alt="Orange and black robot in business suit with headphones"
+          className="absolute right-0 top-1/2 transform -translate-y-1/2 h-full w-auto object-contain drop-shadow-lg z-20 mr-12"
+        />
       </div>
     </section>
   )
