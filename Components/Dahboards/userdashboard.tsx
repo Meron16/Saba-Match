@@ -310,4 +310,161 @@ export default function Dashboard() {
                     }`}
                   >
                     <CardContent className="pt-6">
+                      {/* JOB TITLE & APPLY BUTTON */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-base font-bold text-black">{job.title}</h3>
+                            {job.badge && (
+                              <Badge className="bg-blue-100 text-blue-700 text-xs font-semibold">{job.badge}</Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600">{job.company}</p>
+                        </div>
+                        <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-2 text-sm font-medium">
+                          Apply
+                        </Button>
+                      </div>
+
+                      {/* JOB META INFO */}
+                      <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
+                        <span className="flex items-center gap-1">📍 {job.location}</span>
+                        <span className="flex items-center gap-1">💼 {job.type}</span>
+                      </div>
+
+                      {/* POSTED TIME */}
+                      <p className="text-xs text-gray-500">Posted {job.posted}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* ======== APPLICATION STATUS SECTION (MOBILE) ======== */}
+            <div className="lg:hidden">
+              <h2 className="text-xl font-bold text-black mb-4">Your Applications</h2>
+              <div className="space-y-3">
+                {APPLICATIONS.map((app) => (
+                  <div key={app.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="mb-2">
+                      <h3 className="text-sm font-bold text-black">{app.jobTitle}</h3>
+                      <p className="text-xs text-gray-600">{app.company}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">
+                        Applied {new Date(app.appliedDate).toLocaleDateString()}
+                      </span>
+                      <Badge className={`flex items-center gap-1 ${getStatusColor(app.status)}`}>
+                        {getStatusIcon(app.status)}
+                        <span className="capitalize">{app.status}</span>
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ======== RIGHT SIDEBAR - JOB DETAILS & APPLICATIONS ======== */}
+          <div className="space-y-6">
+            {/* ======== JOB DETAILS PANEL ======== */}
+            {selectedJob && (
+              <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-8">
+                {/* BACK BUTTON */}
+                <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-black mb-4">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+
+                {/* JOB HEADER */}
+                <div className="mb-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h1 className="text-2xl font-bold text-black">{selectedJob.title}</h1>
+                      <p className="text-gray-600 text-sm mt-1">{selectedJob.type}</p>
+                    </div>
+                    {selectedJob.badge && (
+                      <Badge className="bg-blue-100 text-blue-700 font-semibold px-3 py-1">{selectedJob.badge}</Badge>
+                    )}
+                  </div>
+
+                  {/* COMPANY INFO */}
+                  <div className="flex items-center gap-1 text-sm">
+                    <span className="font-semibold text-black">{selectedJob.company}</span>
+                    {selectedJob.companyVerified && <CheckCircleIcon className="w-4 h-4 text-blue-500" />}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Verified company</p>
+                </div>
+
+                {/* JOB QUICK INFO */}
+                <div className="grid grid-cols-2 gap-3 mb-6 pb-6 border-b border-gray-200">
+                  <div>
+                    <p className="text-xs text-gray-600">Posted Date</p>
+                    <p className="text-sm font-semibold text-black">{selectedJob.postedDate}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600">Location</p>
+                    <p className="text-sm font-semibold text-black flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {selectedJob.location}
+                    </p>
+                  </div>
+                </div>
+
+                {/* JOB DETAILS GRID */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  {/* JOB TYPE */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-600 mb-1">Job Type</p>
+                    <p className="text-sm font-semibold text-black">{selectedJob.type}</p>
+                  </div>
+
+                  {/* DEADLINE */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      Deadline
+                    </p>
+                    <p className="text-sm font-semibold text-black">{selectedJob.deadline}</p>
+                  </div>
+
+                  {/* VACANCIES */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      Vacancies
+                    </p>
+                    <p className="text-sm font-semibold text-black">{selectedJob.vacancies}</p>
+                  </div>
+
+                  {/* EDUCATION */}
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-600 mb-1 flex items-center gap-1">
+                      <BookOpen className="w-3 h-3" />
+                      Education
+                    </p>
+                    <p className="text-sm font-semibold text-black">{selectedJob.education}</p>
+                  </div>
+                </div>
+
+                {/* SALARY & EXPERIENCE */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <p className="text-xs text-gray-600 mb-2 flex items-center gap-1">
+                      <DollarSign className="w-3 h-3" />
+                      Salary
+                    </p>
+                    <p className="text-sm font-bold text-black">{selectedJob.salary}</p>
+                    <p className="text-xs text-gray-500">{selectedJob.salaryType}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 mb-2 flex items-center gap-1">
+                      <Briefcase className="w-3 h-3" />
+                      Experience
+                    </p>
+                    <p className="text-sm font-bold text-black">{selectedJob.experience}</p>
+                    <p className="text-xs text-gray-500">Experience Level</p>
+                  </div>
+                </div>
+
  
