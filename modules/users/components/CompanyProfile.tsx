@@ -43,7 +43,6 @@ interface CompanyProfileData {
   registrationNumber?: string;
   taxId?: string;
   businessLicenseUrl?: string;
-  verificationDocUrl?: string;
 }
 
 export default function CompanyProfile() {
@@ -167,8 +166,7 @@ export default function CompanyProfile() {
 
       if (response.ok) {
         const data = await response.json();
-        const updateField =
-          docType === "license" ? "businessLicenseUrl" : "verificationDocUrl";
+      const updateField = "businessLicenseUrl";
 
         const updateResponse = await fetch("/api/users/profile", {
           method: "PATCH",
@@ -483,12 +481,12 @@ export default function CompanyProfile() {
             </CardContent>
           </Card>
 
-          {/* Verification Documents */}
+          {/* Business Documents */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5" />
-                Verification Documents
+                <FileText className="w-5 h-5" />
+                Business Documents
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -561,78 +559,6 @@ export default function CompanyProfile() {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Verification Document
-                </label>
-                {profile?.verificationDocUrl ? (
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-8 h-8 text-orange-500" />
-                      <div>
-                        <p className="font-semibold">Verification Document</p>
-                        <a
-                          href={profile.verificationDocUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-orange-500 hover:underline"
-                        >
-                          View Document
-                        </a>
-                      </div>
-                    </div>
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) =>
-                          handleDocumentUpload(e, "verification")
-                        }
-                        className="hidden"
-                        disabled={uploadingDoc}
-                      />
-                      <Button
-                        variant="outline"
-                        disabled={uploadingDoc}
-                        size="sm"
-                        asChild
-                      >
-                        <span>{uploadingDoc ? "Uploading..." : "Replace"}</span>
-                      </Button>
-                    </label>
-                  </div>
-                ) : (
-                  <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-gray-600 mb-4">
-                      No verification document uploaded
-                    </p>
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) =>
-                          handleDocumentUpload(e, "verification")
-                        }
-                        className="hidden"
-                        disabled={uploadingDoc}
-                      />
-                      <Button
-                        className="bg-orange-500 hover:bg-orange-600"
-                        disabled={uploadingDoc}
-                        asChild
-                      >
-                        <span>
-                          <Upload className="w-4 h-4 mr-2 inline" />
-                          {uploadingDoc
-                            ? "Uploading..."
-                            : "Upload Verification Document"}
-                        </span>
-                      </Button>
-                    </label>
-                  </div>
-                )}
-              </div>
             </CardContent>
           </Card>
         </div>

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/Components/ui/badge";
 import { Button } from "@/Components/ui/button";
 import { Card, CardContent } from "@/Components/ui/card";
+import { JobPostingForm, JobListing, jobService, Job } from "@/modules/jobs";
 import {
   BriefcaseIcon,
   Users,
@@ -29,17 +30,6 @@ import {
 // ============================================================
 // DATA TYPES & INTERFACES
 // ============================================================
-interface Job {
-  id: string;
-  title: string;
-  location: string;
-  salary: string;
-  posted: string;
-  type: "Full Time" | "Part Time" | "Contract";
-  applications: number;
-  status: "active" | "closed";
-}
-
 interface Application {
   id: string;
   jobTitle: string;
@@ -50,41 +40,8 @@ interface Application {
 }
 
 // ============================================================
-// SAMPLE DATA
+// SAMPLE DATA (Applications - will be replaced with real data later)
 // ============================================================
-const COMPANY_JOBS: Job[] = [
-  {
-    id: "1",
-    title: "Operation manager for furniture company",
-    location: "Addis Ababa, Ethiopia",
-    salary: "Amount Not Specified",
-    posted: "2 days ago",
-    type: "Full Time",
-    applications: 12,
-    status: "active",
-  },
-  {
-    id: "2",
-    title: "Senior Frontend Developer",
-    location: "San Francisco, CA",
-    salary: "$120k - $160k",
-    posted: "1 week ago",
-    type: "Full Time",
-    applications: 8,
-    status: "active",
-  },
-  {
-    id: "3",
-    title: "Product Manager",
-    location: "Remote",
-    salary: "$100k - $140k",
-    posted: "3 days ago",
-    type: "Full Time",
-    applications: 15,
-    status: "active",
-  },
-];
-
 const APPLICATIONS: Application[] = [
   {
     id: "1",
@@ -118,9 +75,31 @@ const APPLICATIONS: Application[] = [
 export default function CompanyDashboard() {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTab, setSelectedTab] = useState<"jobs" | "applications">(
-    "jobs"
-  );
+  const [selectedTab, setSelectedTab] = useState<"jobs" | "applications">("jobs");
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showJobForm, setShowJobForm] = useState(false);
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
+  // Load jobs from localStorage on mount
+  useEffect(() => {
+    loadJobs();
+  }, [user]);
+
+  const loadJobs = () => {
+    if (!user?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const companyJobs = jobService.getJobsByCompany(user.id);
+      setJobs(companyJobs);
+    } catch (error) {
+      console.error("Error loading jobs:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // ============================================================
   // HELPER FUNCTIONS
@@ -155,11 +134,82 @@ export default function CompanyDashboard() {
     }
   };
 
-  const filteredJobs = COMPANY_JOBS.filter(
-    (job) =>
+  const handleEditJob = (job: Job) => {
+    setEditingJob(job);
+    setShowJobForm(true);
+  };
+
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/jobs?id=${jobId}`, {
+        method: "DELETE",
+        headers: {
+          "x-user-id": user?.id || "",
+        },
+      });
+
+      if (response.ok) {
+        loadJobs();
+        alert("Job deleted successfully!");
+      } else {
+        alert("Failed to delete job");
+      }
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      alert("Failed to delete job");
+    }
+  };
+
+  const handleToggleJobStatus = async (jobId: string, newStatus: string) => {
+    try {
+      const response = await fetch("/api/jobs", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": user?.id || "",
+        },
+        body: JSON.stringify({
+          id: jobId,
+          status: newStatus,
+        }),
+      });
+
+      if (response.ok) {
+        loadJobs();
+      } else {
+        alert("Failed to update job status");
+      }
+    } catch (error) {
+      console.error("Error updating job status:", error);
+      alert("Failed to update job status");
+    }
+  };
+
+  const handleJobFormSuccess = () => {
+    loadJobs();
+    setShowJobForm(false);
+    setEditingJob(null);
+  };
+
+  const handleJobFormClose = () => {
+    setShowJobForm(false);
+    setEditingJob(null);
+  };
+
+  const filteredJobs = jobs.filter((job) => {
+    const matchesSearch =
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      job.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && job.status === "active" && job.isActive) ||
+      (statusFilter === "draft" && job.status === "draft") ||
+      (statusFilter === "closed" && (job.status === "closed" || !job.isActive));
+
+    return matchesSearch && matchesStatus;
+  });
 
   const filteredApplications = APPLICATIONS.filter(
     (app) =>
@@ -174,6 +224,18 @@ export default function CompanyDashboard() {
       .join("")
       .toUpperCase()
       .slice(0, 2) || "CO";
+
+  // Calculate stats
+  const totalJobs = jobs.length;
+  const activeJobs = jobs.filter((j) => j.status === "active" && j.isActive).length;
+  const draftJobs = jobs.filter((j) => j.status === "draft").length;
+  const totalApplications = APPLICATIONS.length;
+  const pendingApplications = APPLICATIONS.filter(
+    (app) => app.status === "pending" || app.status === "reviewing"
+  ).length;
+  const acceptedApplications = APPLICATIONS.filter(
+    (app) => app.status === "accepted"
+  ).length;
 
   // ============================================================
   // RENDER
@@ -277,8 +339,9 @@ export default function CompanyDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Total Jobs</p>
-                  <p className="text-2xl font-bold text-black">
-                    {COMPANY_JOBS.length}
+                  <p className="text-2xl font-bold text-black">{totalJobs}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {activeJobs} active
                   </p>
                 </div>
                 <BriefcaseIcon className="w-8 h-8 text-orange-500" />
@@ -294,7 +357,7 @@ export default function CompanyDashboard() {
                     Total Applications
                   </p>
                   <p className="text-2xl font-bold text-black">
-                    {APPLICATIONS.length}
+                    {totalApplications}
                   </p>
                 </div>
                 <Users className="w-8 h-8 text-blue-500" />
@@ -308,12 +371,7 @@ export default function CompanyDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Pending Review</p>
                   <p className="text-2xl font-bold text-black">
-                    {
-                      APPLICATIONS.filter(
-                        (app) =>
-                          app.status === "pending" || app.status === "reviewing"
-                      ).length
-                    }
+                    {pendingApplications}
                   </p>
                 </div>
                 <ClockIcon className="w-8 h-8 text-yellow-500" />
@@ -327,10 +385,7 @@ export default function CompanyDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Accepted</p>
                   <p className="text-2xl font-bold text-black">
-                    {
-                      APPLICATIONS.filter((app) => app.status === "accepted")
-                        .length
-                    }
+                    {acceptedApplications}
                   </p>
                 </div>
                 <CheckCircleIcon className="w-8 h-8 text-green-500" />
@@ -364,7 +419,13 @@ export default function CompanyDashboard() {
                 Applications
               </button>
             </div>
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+            <Button
+              onClick={() => {
+                setEditingJob(null);
+                setShowJobForm(true);
+              }}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Post New Job
             </Button>
@@ -386,65 +447,61 @@ export default function CompanyDashboard() {
             />
           </div>
 
+          {/* Status Filter for Jobs Tab */}
+          {selectedTab === "jobs" && (
+            <div className="mb-6 flex gap-2">
+              <Button
+                variant={statusFilter === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter("all")}
+                className={statusFilter === "all" ? "bg-orange-500 hover:bg-orange-600" : ""}
+              >
+                All ({totalJobs})
+              </Button>
+              <Button
+                variant={statusFilter === "active" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter("active")}
+                className={statusFilter === "active" ? "bg-green-500 hover:bg-green-600" : ""}
+              >
+                Active ({activeJobs})
+              </Button>
+              <Button
+                variant={statusFilter === "draft" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter("draft")}
+                className={statusFilter === "draft" ? "bg-yellow-500 hover:bg-yellow-600" : ""}
+              >
+                Draft ({draftJobs})
+              </Button>
+              <Button
+                variant={statusFilter === "closed" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setStatusFilter("closed")}
+                className={statusFilter === "closed" ? "bg-gray-500 hover:bg-gray-600" : ""}
+              >
+                Closed ({totalJobs - activeJobs - draftJobs})
+              </Button>
+            </div>
+          )}
+
           {/* JOBS TAB */}
           {selectedTab === "jobs" && (
-            <div className="space-y-4">
-              {filteredJobs.map((job) => (
-                <Card key={job.id} className="hover:shadow-lg transition-all">
-                  <CardContent className="pt-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-bold text-black">
-                            {job.title}
-                          </h3>
-                          <Badge
-                            className={
-                              job.status === "active"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
-                            }
-                          >
-                            {job.status}
-                          </Badge>
-                        </div>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {job.location}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="w-4 h-4" />
-                            {job.salary}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <BriefcaseIcon className="w-4 h-4" />
-                            {job.type}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="w-4 h-4" />
-                            {job.applications} applications
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-500">
-                          Posted {job.posted}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" className="text-sm">
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="text-sm border-red-300 text-red-600 hover:bg-red-50"
-                        >
-                          Close
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div>
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading jobs...</p>
+                </div>
+              ) : (
+                <JobListing
+                  jobs={filteredJobs}
+                  onEdit={handleEditJob}
+                  onDelete={handleDeleteJob}
+                  onToggleStatus={handleToggleJobStatus}
+                  showActions={true}
+                />
+              )}
             </div>
           )}
 
@@ -460,10 +517,8 @@ export default function CompanyDashboard() {
                           {app.jobTitle}
                         </h3>
                         <p className="text-sm text-gray-600 mb-2">
-                          <span className="font-semibold">
-                            {app.applicantName}
-                          </span>{" "}
-                          • {app.applicantEmail}
+                          <span className="font-semibold">{app.applicantName}</span> •{" "}
+                          {app.applicantEmail}
                         </p>
                         <p className="text-xs text-gray-500">
                           Applied{" "}
@@ -480,11 +535,7 @@ export default function CompanyDashboard() {
                           <span className="capitalize">{app.status}</span>
                         </Badge>
                         <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            className="text-sm"
-                            size="sm"
-                          >
+                          <Button variant="outline" className="text-sm" size="sm">
                             View CV
                           </Button>
                           <Button
@@ -503,6 +554,15 @@ export default function CompanyDashboard() {
           )}
         </div>
       </div>
+
+      {/* Job Posting Form Modal */}
+      {showJobForm && (
+        <JobPostingForm
+          job={editingJob}
+          onClose={handleJobFormClose}
+          onSuccess={handleJobFormSuccess}
+        />
+      )}
     </div>
   );
 }
