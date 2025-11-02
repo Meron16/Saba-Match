@@ -11,7 +11,7 @@ import { X, Save, FileText } from "lucide-react";
 interface JobPostingFormProps {
   job?: Job | null;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (newJobId?: string) => void;
 }
 
 export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFormProps) {
@@ -100,7 +100,27 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
       });
 
       if (response.ok) {
-        onSuccess();
+        const result = await response.json();
+        const savedJob = result.job;
+        
+        // Save job to localStorage on client side (API runs server-side)
+        if (savedJob && typeof window !== "undefined") {
+          try {
+            const allJobs = jobService.getAllJobs();
+            // Check if job already exists (for updates)
+            const existingIndex = allJobs.findIndex(j => j.id === savedJob.id);
+            if (existingIndex >= 0) {
+              allJobs[existingIndex] = savedJob;
+            } else {
+              allJobs.push(savedJob);
+            }
+            jobService.saveJobs(allJobs);
+          } catch (error) {
+            console.error("Error saving job to localStorage:", error);
+          }
+        }
+        
+        onSuccess(savedJob?.id);
         onClose();
       } else {
         const error = await response.json();

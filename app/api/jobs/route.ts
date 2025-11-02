@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jobService, Job } from "@/lib/services/jobService";
 import { jobPostingSchema, jobUpdateSchema, jobSearchSchema } from "@/lib/validators/job-validators";
+import { prisma } from "@/lib/prisma";
 
 // GET - Get jobs (with optional filtering)
 export async function GET(request: NextRequest) {
@@ -83,11 +84,45 @@ export async function POST(request: NextRequest) {
     // In a real app, you'd fetch this from the user's company profile
     const companyName = body.companyName || "Company";
     
-    const newJob = jobService.createJob({
+    // Create job object (client will save to localStorage)
+    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date().toISOString();
+    const newJob: Job = {
       ...validatedData,
+      id: jobId,
       companyId: userId,
       companyName,
-    });
+      postedDate: now,
+      createdAt: now,
+      updatedAt: now,
+      isActive: validatedData.status === "active",
+    };
+    
+    // Save to Prisma database for applications matching
+    try {
+      await prisma.job.create({
+        data: {
+          id: jobId,
+          title: validatedData.title,
+          description: validatedData.description,
+          companyId: userId,
+          location: validatedData.location || "",
+          salary: validatedData.salary || null,
+          salaryType: validatedData.salaryType || null,
+          type: validatedData.type || "Full Time",
+          requirements: validatedData.requirements || null,
+          education: validatedData.education || null,
+          experience: validatedData.experience || null,
+          vacancies: validatedData.vacancies || 1,
+          deadline: validatedData.deadline ? new Date(validatedData.deadline) : null,
+          isActive: validatedData.status === "active",
+          postedDate: new Date(now),
+        },
+      });
+    } catch (dbError) {
+      console.error("Error saving job to database:", dbError);
+      // Continue - client will save to localStorage
+    }
     
     return NextResponse.json({ job: newJob }, { status: 201 });
   } catch (error: any) {
@@ -138,6 +173,33 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "Failed to update job" }, { status: 500 });
     }
     
+    // Also update in Prisma database
+    try {
+      const dbUpdateData: any = {};
+      if (validatedData.title !== undefined) dbUpdateData.title = validatedData.title;
+      if (validatedData.description !== undefined) dbUpdateData.description = validatedData.description;
+      if (validatedData.location !== undefined) dbUpdateData.location = validatedData.location;
+      if (validatedData.salary !== undefined) dbUpdateData.salary = validatedData.salary;
+      if (validatedData.salaryType !== undefined) dbUpdateData.salaryType = validatedData.salaryType;
+      if (validatedData.type !== undefined) dbUpdateData.type = validatedData.type;
+      if (validatedData.requirements !== undefined) dbUpdateData.requirements = validatedData.requirements;
+      if (validatedData.education !== undefined) dbUpdateData.education = validatedData.education;
+      if (validatedData.experience !== undefined) dbUpdateData.experience = validatedData.experience;
+      if (validatedData.vacancies !== undefined) dbUpdateData.vacancies = validatedData.vacancies;
+      if (validatedData.deadline !== undefined) dbUpdateData.deadline = validatedData.deadline ? new Date(validatedData.deadline) : null;
+      if (validatedData.status !== undefined) dbUpdateData.isActive = validatedData.status === "active";
+      
+      if (Object.keys(dbUpdateData).length > 0) {
+        await prisma.job.update({
+          where: { id },
+          data: dbUpdateData,
+        });
+      }
+    } catch (dbError) {
+      console.error("Error updating job in database:", dbError);
+      // Continue even if database update fails
+    }
+    
     return NextResponse.json({ job: updatedJob }, { status: 200 });
   } catch (error: any) {
     console.error("Error updating job:", error);
@@ -184,6 +246,16 @@ export async function DELETE(request: NextRequest) {
     
     if (!deleted) {
       return NextResponse.json({ error: "Failed to delete job" }, { status: 500 });
+    }
+    
+    // Also delete from Prisma database
+    try {
+      await prisma.job.delete({
+        where: { id: jobId },
+      });
+    } catch (dbError) {
+      console.error("Error deleting job from database:", dbError);
+      // Continue even if database delete fails
     }
     
     return NextResponse.json({ message: "Job deleted successfully" }, { status: 200 });
