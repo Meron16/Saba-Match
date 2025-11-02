@@ -9,6 +9,7 @@ export default function About() {
         {/* Header Section */}
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            {/**adding animation to the logo here */}
             About <span className="text-[#FF9833]">AI HIRE</span>
           </h1>
           <p className="text-gray-600 text-lg max-w-3xl mx-auto leading-relaxed">
@@ -27,7 +28,7 @@ export default function About() {
               the perfect match.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Through our AI-powered platform, we're bridging the gap between talent and opportunity, 
+              Through our AI-powered platform, we are bridging the gap between talent and opportunity, 
               creating a future where recruitment is transparent, data-driven, and human-centered.
             </p>
           </div>
