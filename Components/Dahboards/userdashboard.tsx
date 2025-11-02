@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useAuth } from "@/lib/auth-context"
-import { Badge } from "@/Components/ui/badge"
-import { Button } from "@/Components/ui/button"
-import { Card, CardContent } from "@/Components/ui/card"
+import { useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { Badge } from "@/Components/ui/badge";
+import { Button } from "@/Components/ui/button";
+import { Card, CardContent } from "@/Components/ui/card";
 import {
   SearchIcon,
   BriefcaseIcon,
@@ -21,47 +22,51 @@ import {
   Bookmark,
   ArrowLeft,
   LogOut,
-} from "lucide-react"
+  User,
+  FileText,
+  Award,
+  Settings,
+} from "lucide-react";
 
 // ============================================================
 // DATA TYPES & INTERFACES
 // ============================================================
 interface Job {
-  id: string
-  title: string
-  company: string
-  location: string
-  salary: string
-  posted: string
-  type: "Full Time" | "Part Time" | "Contract"
-  badge?: string
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  salary: string;
+  posted: string;
+  type: "Full Time" | "Part Time" | "Contract";
+  badge?: string;
 }
 
 interface JobDetails {
-  id: string
-  title: string
-  company: string
-  companyVerified: boolean
-  jobsPosted: number
-  location: string
-  postedDate: string
-  badge?: string
-  type: string
-  deadline: string
-  vacancies: number
-  education: string
-  salary: string
-  salaryType: "Monthly" | "Annual"
-  experience: string
-  description: string
+  id: string;
+  title: string;
+  company: string;
+  companyVerified: boolean;
+  jobsPosted: number;
+  location: string;
+  postedDate: string;
+  badge?: string;
+  type: string;
+  deadline: string;
+  vacancies: number;
+  education: string;
+  salary: string;
+  salaryType: "Monthly" | "Annual";
+  experience: string;
+  description: string;
 }
 
 interface Application {
-  id: string
-  jobTitle: string
-  company: string
-  appliedDate: string
-  status: "pending" | "reviewing" | "accepted" | "rejected"
+  id: string;
+  jobTitle: string;
+  company: string;
+  appliedDate: string;
+  status: "pending" | "reviewing" | "accepted" | "rejected";
 }
 
 // ============================================================
@@ -105,7 +110,7 @@ const JOBS: Job[] = [
     posted: "1 week ago",
     type: "Full Time",
   },
-]
+];
 
 const JOB_DETAILS: { [key: string]: JobDetails } = {
   "1": {
@@ -159,7 +164,7 @@ Requirements:
     description:
       "We're looking for an experienced Senior Frontend Developer to join our team and help build amazing user experiences.",
   },
-}
+};
 
 const APPLICATIONS: Application[] = [
   {
@@ -190,22 +195,23 @@ const APPLICATIONS: Application[] = [
     appliedDate: "2024-12-15",
     status: "rejected",
   },
-]
+];
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
 export default function Dashboard() {
-  const { user, logout } = useAuth()
-  const [selectedJobId, setSelectedJobId] = useState<string>("1")
-  const [searchQuery, setSearchQuery] = useState("")
+  const { user, logout } = useAuth();
+  const [selectedJobId, setSelectedJobId] = useState<string>("1");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const userInitials = user?.fullName
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2) || "US"
+  const userInitials =
+    user?.fullName
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "US";
 
   // ============================================================
   // HELPER FUNCTIONS
@@ -213,40 +219,40 @@ export default function Dashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
-        return "bg-yellow-100 text-yellow-800"
+        return "bg-yellow-100 text-yellow-800";
       case "reviewing":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "accepted":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "rejected":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "pending":
-        return <ClockIcon className="w-4 h-4" />
+        return <ClockIcon className="w-4 h-4" />;
       case "reviewing":
-        return <ClockIcon className="w-4 h-4" />
+        return <ClockIcon className="w-4 h-4" />;
       case "accepted":
-        return <CheckCircleIcon className="w-4 h-4" />
+        return <CheckCircleIcon className="w-4 h-4" />;
       case "rejected":
-        return <XCircleIcon className="w-4 h-4" />
+        return <XCircleIcon className="w-4 h-4" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   const filteredJobs = JOBS.filter(
     (job) =>
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchQuery.toLowerCase()),
-  )
+      job.company.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const selectedJob = JOB_DETAILS[selectedJobId]
+  const selectedJob = JOB_DETAILS[selectedJobId];
 
   // ============================================================
   // RENDER
@@ -258,14 +264,24 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-black">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Welcome back! Here's your recruitment journey.</p>
+            <p className="text-gray-600 mt-1">
+              Welcome back! Here's your recruitment journey.
+            </p>
           </div>
 
           {/* PROFILE SECTION - TOP RIGHT */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-4 bg-white rounded-lg border border-gray-200 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Link href="/profile">
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-5 py-2 font-medium">
+                <User className="w-4 h-4 mr-2" />
+                My Profile
+              </Button>
+            </Link>
+            <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors">
               <div className="text-right">
-                <p className="text-sm font-semibold text-black">{user?.fullName || "User"}</p>
+                <p className="text-sm font-semibold text-black">
+                  {user?.fullName || "User"}
+                </p>
                 <p className="text-xs text-gray-600">Job Seeker</p>
               </div>
               <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold">
@@ -288,6 +304,54 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* ======== LEFT SIDEBAR - JOBS & APPLICATIONS ======== */}
           <div className="lg:col-span-2 space-y-8">
+            {/* ======== PROFILE QUICK ACCESS CARD ======== */}
+            <Card className="bg-gradient-to-r from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-all">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
+                      <User className="w-8 h-8 text-orange-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                        Complete Your Profile
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Add your CV, skills, and certificates to stand out to
+                        employers
+                      </p>
+                    </div>
+                  </div>
+                  <Link href="/profile">
+                    <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 py-3 font-semibold shadow-lg">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Manage Profile
+                    </Button>
+                  </Link>
+                </div>
+                <div className="mt-6 grid grid-cols-3 gap-4 pt-6 border-t border-orange-200">
+                  <div className="text-center">
+                    <FileText className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+                    <p className="text-sm font-semibold text-gray-900">CV</p>
+                    <p className="text-xs text-gray-600">Upload your CV</p>
+                  </div>
+                  <div className="text-center">
+                    <Award className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+                    <p className="text-sm font-semibold text-gray-900">
+                      Certificates
+                    </p>
+                    <p className="text-xs text-gray-600">Add credentials</p>
+                  </div>
+                  <div className="text-center">
+                    <Briefcase className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+                    <p className="text-sm font-semibold text-gray-900">
+                      Skills
+                    </p>
+                    <p className="text-xs text-gray-600">Showcase talents</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             {/* ======== JOBS SECTION ======== */}
             <div>
               <div className="flex items-center justify-between mb-6">
@@ -314,7 +378,9 @@ export default function Dashboard() {
                 <button className="text-sm font-medium text-gray-600 border-b-2 border-orange-500 pb-2 text-orange-500">
                   All jobs
                 </button>
-                <button className="text-sm font-medium text-gray-600 hover:text-black">Saved jobs</button>
+                <button className="text-sm font-medium text-gray-600 hover:text-black">
+                  Saved jobs
+                </button>
               </div>
 
               {/* JOB CARDS LIST */}
@@ -334,9 +400,13 @@ export default function Dashboard() {
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-3">
-                            <h3 className="text-base font-bold text-black">{job.title}</h3>
+                            <h3 className="text-base font-bold text-black">
+                              {job.title}
+                            </h3>
                             {job.badge && (
-                              <Badge className="bg-blue-100 text-blue-700 text-xs font-semibold">{job.badge}</Badge>
+                              <Badge className="bg-blue-100 text-blue-700 text-xs font-semibold">
+                                {job.badge}
+                              </Badge>
                             )}
                           </div>
                           <p className="text-sm text-gray-600">{job.company}</p>
@@ -348,12 +418,18 @@ export default function Dashboard() {
 
                       {/* JOB META INFO */}
                       <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-3">
-                        <span className="flex items-center gap-1">📍 {job.location}</span>
-                        <span className="flex items-center gap-1">💼 {job.type}</span>
+                        <span className="flex items-center gap-1">
+                          📍 {job.location}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          💼 {job.type}
+                        </span>
                       </div>
 
                       {/* POSTED TIME */}
-                      <p className="text-xs text-gray-500">Posted {job.posted}</p>
+                      <p className="text-xs text-gray-500">
+                        Posted {job.posted}
+                      </p>
                     </CardContent>
                   </Card>
                 ))}
@@ -362,19 +438,30 @@ export default function Dashboard() {
 
             {/* ======== APPLICATION STATUS SECTION (MOBILE) ======== */}
             <div className="lg:hidden">
-              <h2 className="text-xl font-bold text-black mb-4">Your Applications</h2>
+              <h2 className="text-xl font-bold text-black mb-4">
+                Your Applications
+              </h2>
               <div className="space-y-3">
                 {APPLICATIONS.map((app) => (
-                  <div key={app.id} className="border border-gray-200 rounded-lg p-4">
+                  <div
+                    key={app.id}
+                    className="border border-gray-200 rounded-lg p-4"
+                  >
                     <div className="mb-2">
-                      <h3 className="text-sm font-bold text-black">{app.jobTitle}</h3>
+                      <h3 className="text-sm font-bold text-black">
+                        {app.jobTitle}
+                      </h3>
                       <p className="text-xs text-gray-600">{app.company}</p>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">
                         Applied {new Date(app.appliedDate).toLocaleDateString()}
                       </span>
-                      <Badge className={`flex items-center gap-1 ${getStatusColor(app.status)}`}>
+                      <Badge
+                        className={`flex items-center gap-1 ${getStatusColor(
+                          app.status
+                        )}`}
+                      >
                         {getStatusIcon(app.status)}
                         <span className="capitalize">{app.status}</span>
                       </Badge>
@@ -400,18 +487,28 @@ export default function Dashboard() {
                 <div className="mb-6">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h1 className="text-2xl font-bold text-black">{selectedJob.title}</h1>
-                      <p className="text-gray-600 text-sm mt-1">{selectedJob.type}</p>
+                      <h1 className="text-2xl font-bold text-black">
+                        {selectedJob.title}
+                      </h1>
+                      <p className="text-gray-600 text-sm mt-1">
+                        {selectedJob.type}
+                      </p>
                     </div>
                     {selectedJob.badge && (
-                      <Badge className="bg-blue-100 text-blue-700 font-semibold px-3 py-1">{selectedJob.badge}</Badge>
+                      <Badge className="bg-blue-100 text-blue-700 font-semibold px-3 py-1">
+                        {selectedJob.badge}
+                      </Badge>
                     )}
                   </div>
 
                   {/* COMPANY INFO */}
                   <div className="flex items-center gap-1 text-sm">
-                    <span className="font-semibold text-black">{selectedJob.company}</span>
-                    {selectedJob.companyVerified && <CheckCircleIcon className="w-4 h-4 text-blue-500" />}
+                    <span className="font-semibold text-black">
+                      {selectedJob.company}
+                    </span>
+                    {selectedJob.companyVerified && (
+                      <CheckCircleIcon className="w-4 h-4 text-blue-500" />
+                    )}
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Verified company</p>
                 </div>
@@ -420,7 +517,9 @@ export default function Dashboard() {
                 <div className="grid grid-cols-2 gap-3 mb-6 pb-6 border-b border-gray-200">
                   <div>
                     <p className="text-xs text-gray-600">Posted Date</p>
-                    <p className="text-sm font-semibold text-black">{selectedJob.postedDate}</p>
+                    <p className="text-sm font-semibold text-black">
+                      {selectedJob.postedDate}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Location</p>
@@ -436,7 +535,9 @@ export default function Dashboard() {
                   {/* JOB TYPE */}
                   <div className="bg-gray-50 rounded-lg p-3">
                     <p className="text-xs text-gray-600 mb-1">Job Type</p>
-                    <p className="text-sm font-semibold text-black">{selectedJob.type}</p>
+                    <p className="text-sm font-semibold text-black">
+                      {selectedJob.type}
+                    </p>
                   </div>
 
                   {/* DEADLINE */}
@@ -445,7 +546,9 @@ export default function Dashboard() {
                       <Calendar className="w-3 h-3" />
                       Deadline
                     </p>
-                    <p className="text-sm font-semibold text-black">{selectedJob.deadline}</p>
+                    <p className="text-sm font-semibold text-black">
+                      {selectedJob.deadline}
+                    </p>
                   </div>
 
                   {/* VACANCIES */}
@@ -454,7 +557,9 @@ export default function Dashboard() {
                       <Users className="w-3 h-3" />
                       Vacancies
                     </p>
-                    <p className="text-sm font-semibold text-black">{selectedJob.vacancies}</p>
+                    <p className="text-sm font-semibold text-black">
+                      {selectedJob.vacancies}
+                    </p>
                   </div>
 
                   {/* EDUCATION */}
@@ -463,7 +568,9 @@ export default function Dashboard() {
                       <BookOpen className="w-3 h-3" />
                       Education
                     </p>
-                    <p className="text-sm font-semibold text-black">{selectedJob.education}</p>
+                    <p className="text-sm font-semibold text-black">
+                      {selectedJob.education}
+                    </p>
                   </div>
                 </div>
 
@@ -474,20 +581,26 @@ export default function Dashboard() {
                       <DollarSign className="w-3 h-3" />
                       Salary
                     </p>
-                    <p className="text-sm font-bold text-black">{selectedJob.salary}</p>
-                    <p className="text-xs text-gray-500">{selectedJob.salaryType}</p>
+                    <p className="text-sm font-bold text-black">
+                      {selectedJob.salary}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {selectedJob.salaryType}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600 mb-2 flex items-center gap-1">
                       <Briefcase className="w-3 h-3" />
                       Experience
                     </p>
-                    <p className="text-sm font-bold text-black">{selectedJob.experience}</p>
+                    <p className="text-sm font-bold text-black">
+                      {selectedJob.experience}
+                    </p>
                     <p className="text-xs text-gray-500">Experience Level</p>
                   </div>
                 </div>
-               {/* ACTION BUTTONS */}
-               <div className="space-y-3 mb-6">
+                {/* ACTION BUTTONS */}
+                <div className="space-y-3 mb-6">
                   <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full py-3 font-semibold">
                     Apply now
                   </Button>
@@ -511,7 +624,9 @@ export default function Dashboard() {
 
                 {/* JOB DESCRIPTION */}
                 <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-lg font-bold text-black mb-3">Job Description</h3>
+                  <h3 className="text-lg font-bold text-black mb-3">
+                    Job Description
+                  </h3>
                   <div className="text-sm text-gray-700 leading-relaxed space-y-3">
                     {selectedJob.description.split("\n").map((line, idx) => (
                       <p key={idx}>{line}</p>
@@ -523,8 +638,12 @@ export default function Dashboard() {
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-black">{selectedJob.company}</p>
-                      <p className="text-xs text-gray-600">Jobs Posted: {selectedJob.jobsPosted} jobs</p>
+                      <p className="text-sm font-semibold text-black">
+                        {selectedJob.company}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Jobs Posted: {selectedJob.jobsPosted} jobs
+                      </p>
                     </div>
                     <Button
                       variant="outline"
@@ -546,9 +665,14 @@ export default function Dashboard() {
 
               <div className="space-y-3 max-h-96 overflow-y-auto">
                 {APPLICATIONS.map((app) => (
-                  <div key={app.id} className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                  <div
+                    key={app.id}
+                    className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow"
+                  >
                     <div className="mb-2">
-                      <h3 className="text-sm font-bold text-black">{app.jobTitle}</h3>
+                      <h3 className="text-sm font-bold text-black">
+                        {app.jobTitle}
+                      </h3>
                       <p className="text-xs text-gray-600">{app.company}</p>
                     </div>
 
@@ -556,7 +680,11 @@ export default function Dashboard() {
                       <span className="text-xs text-gray-500">
                         Applied {new Date(app.appliedDate).toLocaleDateString()}
                       </span>
-                      <Badge className={`flex items-center gap-1 ${getStatusColor(app.status)}`}>
+                      <Badge
+                        className={`flex items-center gap-1 ${getStatusColor(
+                          app.status
+                        )}`}
+                      >
                         {getStatusIcon(app.status)}
                         <span className="capitalize text-xs">{app.status}</span>
                       </Badge>
@@ -585,7 +713,5 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }
-
- 

@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
+import type React from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -12,62 +12,70 @@ export default function SignupForm() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user" as "user" | "company",
-  })
+    role: "user" as "user" | "company" | "government",
+  });
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const { signup } = useAuth()
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { signup } = useAuth();
+  const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-    setError("") // Clear error when user types
-  }
+    }));
+    setError(""); // Clear error when user types
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!")
-      return
+      setError("Passwords do not match!");
+      return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long!")
-      return
+      setError("Password must be at least 6 characters long!");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       const success = await signup(
         formData.fullName,
         formData.email,
         formData.password,
         formData.role
-      )
+      );
 
       if (success) {
         // Redirect based on role
         if (formData.role === "user") {
-          router.push("/dashboard/user")
+          router.push("/dashboard/user");
+        } else if (formData.role === "company") {
+          router.push("/dashboard/company");
+        } else if (formData.role === "government") {
+          router.push("/dashboard/government");
         } else {
-          router.push("/dashboard/company")
+          router.push("/dashboard/user");
         }
       } else {
-        setError("An account with this email already exists. Please sign in instead.")
+        setError(
+          "An account with this email already exists. Please sign in instead."
+        );
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.")
+      setError("Something went wrong. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen w-full bg-white flex items-center justify-center px-4">
@@ -75,8 +83,12 @@ export default function SignupForm() {
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl border border-gray-200 p-10 md:p-12">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Account</h1>
-          <p className="text-gray-600 text-sm font-medium">Join us today and get started in minutes</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Create Account
+          </h1>
+          <p className="text-gray-600 text-sm font-medium">
+            Join us today and get started in minutes
+          </p>
         </div>
 
         {/* Error Message */}
@@ -90,7 +102,9 @@ export default function SignupForm() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Full Name */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Full Name</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Full Name
+            </label>
             <input
               type="text"
               name="fullName"
@@ -104,7 +118,9 @@ export default function SignupForm() {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Email Address</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Email Address
+            </label>
             <input
               type="email"
               name="email"
@@ -118,7 +134,9 @@ export default function SignupForm() {
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Password</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Password
+            </label>
             <input
               type="password"
               name="password"
@@ -132,7 +150,9 @@ export default function SignupForm() {
 
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Confirm Password</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Confirm Password
+            </label>
             <input
               type="password"
               name="confirmPassword"
@@ -146,7 +166,9 @@ export default function SignupForm() {
 
           {/* Account Type */}
           <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Account Type</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Account Type
+            </label>
             <select
               name="role"
               value={formData.role}
@@ -161,6 +183,7 @@ export default function SignupForm() {
             >
               <option value="user">Individual User</option>
               <option value="company">Company</option>
+              <option value="government">Government User</option>
             </select>
           </div>
 
@@ -184,11 +207,14 @@ export default function SignupForm() {
         {/* Footer */}
         <p className="text-center text-sm text-gray-600">
           Already have an account?{" "}
-          <Link href="/signin" className="text-[#FF9833] hover:text-[#FF8C1A] font-semibold">
+          <Link
+            href="/signin"
+            className="text-[#FF9833] hover:text-[#FF8C1A] font-semibold"
+          >
             Sign In
           </Link>
         </p>
       </div>
     </div>
-  )
+  );
 }

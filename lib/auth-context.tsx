@@ -1,99 +1,110 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react"
-import { useRouter } from "next/navigation"
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { useRouter } from "next/navigation";
 
 interface User {
-  id: string
-  fullName: string
-  email: string
-  role: "user" | "company"
+  id: string;
+  fullName: string;
+  email: string;
+  role: "user" | "company" | "government";
 }
 
 interface AuthContextType {
-  user: User | null
-  isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean>
-  signup: (fullName: string, email: string, password: string, role: "user" | "company") => Promise<boolean>
-  logout: () => void
-  isAuthenticated: boolean
+  user: User | null;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  signup: (
+    fullName: string,
+    email: string,
+    password: string,
+    role: "user" | "company" | "government"
+  ) => Promise<boolean>;
+  logout: () => void;
+  isAuthenticated: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   // Check for existing session on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedUser = localStorage.getItem("user")
+      const storedUser = localStorage.getItem("user");
       if (storedUser) {
         try {
-          setUser(JSON.parse(storedUser))
+          setUser(JSON.parse(storedUser));
         } catch (error) {
-          console.error("Error parsing stored user:", error)
-          localStorage.removeItem("user")
+          console.error("Error parsing stored user:", error);
+          localStorage.removeItem("user");
         }
       }
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [])
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       // Simulate API call - In production, replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Check if user exists in localStorage
-      const storedUsers = localStorage.getItem("users")
+      const storedUsers = localStorage.getItem("users");
       if (storedUsers) {
-        const users: User[] = JSON.parse(storedUsers)
+        const users: User[] = JSON.parse(storedUsers);
         const foundUser = users.find(
           (u) => u.email === email.toLowerCase().trim()
-        )
+        );
 
         if (foundUser) {
           // In production, verify password hash
           // For now, we'll just check if user exists
-          setUser(foundUser)
-          localStorage.setItem("user", JSON.stringify(foundUser))
-          setIsLoading(false)
-          return true
+          setUser(foundUser);
+          localStorage.setItem("user", JSON.stringify(foundUser));
+          setIsLoading(false);
+          return true;
         }
       }
 
-      setIsLoading(false)
-      return false
+      setIsLoading(false);
+      return false;
     } catch (error) {
-      console.error("Login error:", error)
-      setIsLoading(false)
-      return false
+      console.error("Login error:", error);
+      setIsLoading(false);
+      return false;
     }
-  }
+  };
 
   const signup = async (
     fullName: string,
     email: string,
     password: string,
-    role: "user" | "company"
+    role: "user" | "company" | "government"
   ): Promise<boolean> => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       // Simulate API call - In production, replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Check if user already exists
-      const storedUsers = localStorage.getItem("users")
-      let users: User[] = storedUsers ? JSON.parse(storedUsers) : []
+      const storedUsers = localStorage.getItem("users");
+      let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
 
-      const emailLower = email.toLowerCase().trim()
+      const emailLower = email.toLowerCase().trim();
       if (users.some((u) => u.email === emailLower)) {
-        setIsLoading(false)
-        return false // User already exists
+        setIsLoading(false);
+        return false; // User already exists
       }
 
       // Create new user
@@ -102,28 +113,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fullName,
         email: emailLower,
         role,
-      }
+      };
 
       // In production, hash password before storing
-      users.push(newUser)
-      localStorage.setItem("users", JSON.stringify(users))
-      setUser(newUser)
-      localStorage.setItem("user", JSON.stringify(newUser))
+      users.push(newUser);
+      localStorage.setItem("users", JSON.stringify(users));
+      setUser(newUser);
+      localStorage.setItem("user", JSON.stringify(newUser));
 
-      setIsLoading(false)
-      return true
+      setIsLoading(false);
+      return true;
     } catch (error) {
-      console.error("Signup error:", error)
-      setIsLoading(false)
-      return false
+      console.error("Signup error:", error);
+      setIsLoading(false);
+      return false;
     }
-  }
+  };
 
   const logout = () => {
-    setUser(null)
-    localStorage.removeItem("user")
-    router.push("/signin")
-  }
+    setUser(null);
+    localStorage.removeItem("user");
+    router.push("/signin");
+  };
 
   return (
     <AuthContext.Provider
@@ -138,14 +149,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     >
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext)
+  const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context
+  return context;
 }
-

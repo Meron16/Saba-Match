@@ -1,69 +1,75 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
+import type React from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 
 export default function SigninForm() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-  })
+  });
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const { login } = useAuth()
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-    }))
-    setError("") // Clear error when user types
-  }
+    }));
+    setError(""); // Clear error when user types
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
     try {
-      const success = await login(formData.email, formData.password)
+      const success = await login(formData.email, formData.password);
 
       if (success) {
         // Get user from localStorage to determine role
-        const storedUser = localStorage.getItem("user")
+        const storedUser = localStorage.getItem("user");
         if (storedUser) {
-          const user = JSON.parse(storedUser)
+          const user = JSON.parse(storedUser);
           // Redirect based on role
           if (user.role === "user") {
-            router.push("/dashboard/user")
+            router.push("/dashboard/user");
+          } else if (user.role === "company") {
+            router.push("/dashboard/company");
+          } else if (user.role === "government") {
+            router.push("/dashboard/government");
           } else {
-            router.push("/dashboard/company")
+            router.push("/dashboard/user");
           }
         } else {
-          setError("Failed to retrieve user information. Please try again.")
+          setError("Failed to retrieve user information. Please try again.");
         }
       } else {
-        setError("Invalid email or password. Please try again.")
+        setError("Invalid email or password. Please try again.");
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.")
+      setError("Something went wrong. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen w-full bg-white flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-10">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Welcome Back</h1>
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
+            Welcome Back
+          </h1>
           <p className="text-gray-600 text-sm font-medium">
             Sign in to your account to continue
           </p>
@@ -80,7 +86,9 @@ export default function SigninForm() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
           <div className="relative">
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Email Address</label>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Email Address
+            </label>
             <input
               type="email"
               name="email"
@@ -95,8 +103,13 @@ export default function SigninForm() {
           {/* Password Field */}
           <div className="relative">
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-semibold text-gray-900">Password</label>
-              <a href="#" className="text-xs text-[#FF9833] hover:text-[#FF8C1A] font-medium">
+              <label className="block text-sm font-semibold text-gray-900">
+                Password
+              </label>
+              <a
+                href="#"
+                className="text-xs text-[#FF9833] hover:text-[#FF8C1A] font-medium"
+              >
                 Forgot?
               </a>
             </div>
@@ -131,11 +144,14 @@ export default function SigninForm() {
         {/* Footer */}
         <p className="text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <Link href="/signup" className="text-[#FF9833] hover:text-[#FF8C1A] font-semibold">
+          <Link
+            href="/signup"
+            className="text-[#FF9833] hover:text-[#FF8C1A] font-semibold"
+          >
             Sign Up
           </Link>
         </p>
       </div>
     </div>
-  )
+  );
 }
