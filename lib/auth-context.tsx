@@ -56,10 +56,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call - In production, replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // First, check for government credentials via API
+      try {
+        const govResponse = await fetch("/api/auth/government", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
 
-      // Check if user exists in localStorage
+        if (govResponse.ok) {
+          const govData = await govResponse.json();
+          if (govData.success && govData.user) {
+            setUser(govData.user);
+            localStorage.setItem("user", JSON.stringify(govData.user));
+            setIsLoading(false);
+            return true;
+          }
+        }
+      } catch (govError) {
+        // Not a government user, continue with regular login
+        console.log("Not a government account, trying regular login");
+      }
+
+      // Check if user exists in localStorage for regular users
       const storedUsers = localStorage.getItem("users");
       if (storedUsers) {
         const users: User[] = JSON.parse(storedUsers);

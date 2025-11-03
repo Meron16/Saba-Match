@@ -6,6 +6,7 @@ import { Button } from "@/Components/ui/button";
 import { Badge } from "@/Components/ui/badge";
 import { Job } from "@/lib/services/jobService";
 import { MapPin, DollarSign, Briefcase, Calendar, Users, Edit, Trash2, Eye, EyeOff } from "lucide-react";
+import { useI18n } from "@/lib/i18n/context";
 
 interface JobListingProps {
   jobs: Job[];
@@ -22,6 +23,7 @@ export default function JobListing({
   onToggleStatus,
   showActions = true,
 }: JobListingProps) {
+  const { t } = useI18n();
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -39,20 +41,20 @@ export default function JobListing({
     if (!isActive || status === "closed") {
       return (
         <Badge className="bg-gray-100 text-gray-700">
-          Closed
+          {t.jobs.closed}
         </Badge>
       );
     }
     if (status === "draft") {
       return (
         <Badge className="bg-yellow-100 text-yellow-700">
-          Draft
+          {t.jobs.draft}
         </Badge>
       );
     }
     return (
       <Badge className="bg-green-100 text-green-700">
-        Active
+        {t.jobs.active}
       </Badge>
     );
   };
@@ -61,8 +63,8 @@ export default function JobListing({
     return (
       <div className="text-center py-12">
         <Briefcase className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600 text-lg">No jobs found</p>
-        <p className="text-gray-500 text-sm mt-2">Start by posting your first job!</p>
+        <p className="text-gray-600 text-lg">{t.jobs.title} {t.common.notAvailable}</p>
+        <p className="text-gray-500 text-sm mt-2">{t.jobs.postNewJob}!</p>
       </div>
     );
   }
@@ -96,7 +98,7 @@ export default function JobListing({
                   </span>
                   <span className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    {job.vacancies} vacancy{job.vacancies > 1 ? "ies" : ""}
+                    {job.vacancies} {job.vacancies > 1 ? t.dashboardStrings.vacancies : t.dashboardStrings.vacancy}
                   </span>
                   {job.category && (
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
@@ -112,11 +114,11 @@ export default function JobListing({
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    Posted {formatDate(job.postedDate)}
+                    {t.jobs.postedDate} {formatDate(job.postedDate)}
                   </span>
                   {job.deadline && (
                     <span>
-                      Deadline: {new Date(job.deadline).toLocaleDateString()}
+                      {t.jobs.deadline}: {new Date(job.deadline).toLocaleDateString()}
                     </span>
                   )}
                 </div>
@@ -158,7 +160,7 @@ export default function JobListing({
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      if (confirm("Are you sure you want to delete this job?")) {
+                      if (confirm(t.common.confirm + " " + t.jobs.deleteJob + "?")) {
                         onDelete(job.id);
                       }
                     }}

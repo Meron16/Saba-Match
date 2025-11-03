@@ -4,9 +4,12 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/Components/ui/button"
 import { Menu, X } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
+import { LanguageSwitcher } from "@/Components/ui/language-switcher"
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { t } = useI18n()
 
   return (
     <nav className="bg-white border-b border-gray-100">
@@ -22,27 +25,28 @@ export function Navbar() {
         {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center gap-8">
           <Link href="/" className="text-gray-700 hover:text-orange-500 transition-colors font-medium">
-            Home
+            {t.nav.home}
           </Link>
           <Link href="/about" className="text-gray-700 hover:text-orange-500 transition-colors font-medium">
-            About
+            {t.nav.about}
           </Link>
           <Link href="/services" className="text-gray-700 hover:text-orange-500 transition-colors font-medium">
-            Services
+            {t.nav.services}
           </Link>
           <Link href="/contact" className="text-gray-700 hover:text-orange-500 transition-colors font-medium">
-            Contact
+            {t.nav.contact}
           </Link>
         </div>
 
-        {/* Desktop Signup Button */}
-        <div className="hidden md:block">
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-4">
+          <LanguageSwitcher />
           <Link href="/signup">
             <Button
               variant="outline"
               className="border-2 border-orange-500 text-orange-500 hover:bg-orange-50 rounded-full px-6 py-2 font-medium bg-transparent"
             >
-              Signup
+              {t.nav.signup}
             </Button>
           </Link>
         </div>
@@ -66,35 +70,38 @@ export function Navbar() {
               className="text-gray-700 hover:text-orange-500 transition-colors font-medium py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Home
+              {t.nav.home}
             </Link>
             <Link
               href="/about"
               className="text-gray-700 hover:text-orange-500 transition-colors font-medium py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              About
+              {t.nav.about}
             </Link>
             <Link
               href="/services"
               className="text-gray-700 hover:text-orange-500 transition-colors font-medium py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Services
+              {t.nav.services}
             </Link>
             <Link
               href="/contact"
               className="text-gray-700 hover:text-orange-500 transition-colors font-medium py-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Contact
+              {t.nav.contact}
             </Link>
+            <div className="flex items-center justify-between py-2">
+              <LanguageSwitcher />
+            </div>
             <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
               <Button
                 variant="outline"
                 className="w-full border-2 border-orange-500 text-orange-500 hover:bg-orange-50 rounded-full py-2 font-medium bg-transparent"
               >
-                Signup
+                {t.nav.signup}
               </Button>
             </Link>
           </div>

@@ -9,6 +9,8 @@ import { Card, CardContent } from "@/Components/ui/card";
 import { JobPostingForm, JobListing, jobService, Job } from "@/modules/jobs";
 import { ScreeningResults } from "@/modules/ai-screening";
 import type { CandidateScore } from "@/lib/ai/types";
+import { useI18n } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/Components/ui/language-switcher";
 import {
   BriefcaseIcon,
   Users,
@@ -77,6 +79,7 @@ const APPLICATIONS: Application[] = [
 // ============================================================
 export default function CompanyDashboard() {
   const { user, logout } = useAuth();
+  const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState<"jobs" | "applications" | "screening">("jobs");
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -321,9 +324,12 @@ export default function CompanyDashboard() {
       <div className="bg-white border-b border-gray-200 px-6 md:px-8 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-black">Company Dashboard</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-bold text-black">{t.dashboard.welcome} - {t.roles.company} {t.dashboard.dashboard}</h1>
+              <LanguageSwitcher />
+            </div>
             <p className="text-gray-600 mt-1">
-              Manage your job postings and applications
+              {t.dashboard.postedJobs} {t.common.and} {t.dashboard.applications} {t.common.manage}
             </p>
           </div>
 
@@ -332,7 +338,7 @@ export default function CompanyDashboard() {
             <Link href="/profile">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-5 py-2 font-medium">
                 <User className="w-4 h-4 mr-2" />
-                My Profile
+                {t.nav.profile}
               </Button>
             </Link>
             <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 px-4 py-2">
@@ -352,7 +358,7 @@ export default function CompanyDashboard() {
               className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Logout
+                {t.nav.logout}
             </Button>
           </div>
         </div>
@@ -429,7 +435,7 @@ export default function CompanyDashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">
-                    Total Applications
+                    {t.applications.title} {t.common.all}
                   </p>
                   <p className="text-2xl font-bold text-black">
                     {totalApplications}
@@ -444,7 +450,7 @@ export default function CompanyDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Pending Review</p>
+                  <p className="text-sm text-gray-600 mb-1">{t.applications.pending} {t.common.view}</p>
                   <p className="text-2xl font-bold text-black">
                     {pendingApplications}
                   </p>
@@ -458,7 +464,7 @@ export default function CompanyDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Accepted</p>
+                  <p className="text-sm text-gray-600 mb-1">{t.applications.accepted}</p>
                   <p className="text-2xl font-bold text-black">
                     {acceptedApplications}
                   </p>
@@ -481,7 +487,7 @@ export default function CompanyDashboard() {
                     : "text-gray-600 hover:text-black"
                 }`}
               >
-                Posted Jobs
+                {t.dashboard.postedJobs}
               </button>
               <button
                 onClick={() => setSelectedTab("applications")}
@@ -491,7 +497,7 @@ export default function CompanyDashboard() {
                     : "text-gray-600 hover:text-black"
                 }`}
               >
-                Applications
+                {t.dashboard.applications}
               </button>
               <button
                 onClick={() => setSelectedTab("screening")}
@@ -501,7 +507,7 @@ export default function CompanyDashboard() {
                     : "text-gray-600 hover:text-black"
                 }`}
               >
-                AI Screening
+                {t.dashboard.aiScreening}
               </button>
             </div>
             <Button
@@ -512,7 +518,7 @@ export default function CompanyDashboard() {
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Post New Job
+              {t.jobs.postNewJob}
             </Button>
           </div>
 
@@ -541,7 +547,7 @@ export default function CompanyDashboard() {
                 onClick={() => setStatusFilter("all")}
                 className={statusFilter === "all" ? "bg-orange-500 hover:bg-orange-600" : ""}
               >
-                All ({totalJobs})
+                {t.common.all} ({totalJobs})
               </Button>
               <Button
                 variant={statusFilter === "active" ? "default" : "outline"}
@@ -549,7 +555,7 @@ export default function CompanyDashboard() {
                 onClick={() => setStatusFilter("active")}
                 className={statusFilter === "active" ? "bg-green-500 hover:bg-green-600" : ""}
               >
-                Active ({activeJobs})
+                {t.jobs.active} ({activeJobs})
               </Button>
               <Button
                 variant={statusFilter === "draft" ? "default" : "outline"}
@@ -557,7 +563,7 @@ export default function CompanyDashboard() {
                 onClick={() => setStatusFilter("draft")}
                 className={statusFilter === "draft" ? "bg-yellow-500 hover:bg-yellow-600" : ""}
               >
-                Draft ({draftJobs})
+                {t.jobs.draft} ({draftJobs})
               </Button>
               <Button
                 variant={statusFilter === "closed" ? "default" : "outline"}
@@ -565,7 +571,7 @@ export default function CompanyDashboard() {
                 onClick={() => setStatusFilter("closed")}
                 className={statusFilter === "closed" ? "bg-gray-500 hover:bg-gray-600" : ""}
               >
-                Closed ({totalJobs - activeJobs - draftJobs})
+                {t.jobs.closed} ({totalJobs - activeJobs - draftJobs})
               </Button>
             </div>
           )}
@@ -576,7 +582,7 @@ export default function CompanyDashboard() {
               {isLoading ? (
                 <div className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Loading jobs...</p>
+                  <p className="text-gray-600">{t.common.loading} {t.jobs.title.toLowerCase()}...</p>
                 </div>
               ) : (
                 <JobListing
@@ -646,9 +652,9 @@ export default function CompanyDashboard() {
                   <CardContent className="pt-6">
                     <div className="text-center py-12">
                       <BriefcaseIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 text-lg mb-2">No jobs available</p>
+                      <p className="text-gray-600 text-lg mb-2">{t.jobs.title} {t.common.notAvailable}</p>
                       <p className="text-gray-500 text-sm">
-                        Create a job posting first to screen candidates
+                        {t.jobs.postNewJob} {t.common.view} {t.screening.title} {t.dashboard.candidates}
                       </p>
                     </div>
                   </CardContent>
@@ -660,7 +666,7 @@ export default function CompanyDashboard() {
                     <Card>
                       <CardContent className="pt-6">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Select Job to Screen Candidates
+                          {t.screening.selectJob}
                         </label>
                         <select
                           value={selectedJobForScreening}
@@ -701,7 +707,7 @@ export default function CompanyDashboard() {
                         <div>
                           <div className="mb-4 flex items-center justify-between">
                             <h3 className="text-xl font-bold text-black">
-                              AI-Ranked Candidates
+                              {t.screening.title} {t.dashboard.candidates}
                             </h3>
                             <Button
                               onClick={() => screenApplicationsForJob(selectedJobForScreening)}
@@ -709,7 +715,7 @@ export default function CompanyDashboard() {
                               size="sm"
                             >
                               <RefreshCw className="w-4 h-4 mr-2" />
-                              Refresh Rankings
+                              {t.screening.refreshRankings}
                             </Button>
                           </div>
                           <ScreeningResults 
@@ -729,16 +735,16 @@ export default function CompanyDashboard() {
                           <CardContent className="pt-6">
                             <div className="text-center py-12">
                               <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                              <p className="text-gray-600 text-lg mb-2">No candidates screened yet</p>
+                              <p className="text-gray-600 text-lg mb-2">{t.screening.noCandidates}</p>
                               <p className="text-gray-500 text-sm mb-4">
-                                Applications will be automatically ranked by AI when available
+                                {t.applications.title} {t.common.all} {t.common.and} {t.screening.title} {t.common.view} {t.common.and} {t.screening.title}
                               </p>
                               <Button
                                 onClick={() => screenApplicationsForJob(selectedJobForScreening)}
                                 className="bg-orange-500 hover:bg-orange-600 text-white"
                               >
                                 <RefreshCw className="w-4 h-4 mr-2" />
-                                Screen Candidates
+                                {t.screening.screenAll}
                               </Button>
                             </div>
                           </CardContent>
@@ -753,9 +759,9 @@ export default function CompanyDashboard() {
                       <CardContent className="pt-6">
                         <div className="text-center py-12">
                           <BriefcaseIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-600 text-lg mb-2">No jobs available</p>
+                          <p className="text-gray-600 text-lg mb-2">{t.jobs.title} {t.common.notAvailable}</p>
                           <p className="text-gray-500 text-sm mb-4">
-                            Create a job posting first to screen candidates
+                            {t.jobs.postNewJob} {t.common.view} {t.screening.title} {t.dashboard.candidates}
                           </p>
                           <Button
                             onClick={() => {
@@ -765,7 +771,7 @@ export default function CompanyDashboard() {
                             className="bg-orange-500 hover:bg-orange-600 text-white"
                           >
                             <Plus className="w-4 h-4 mr-2" />
-                            Post Your First Job
+                            {t.jobs.postNewJob}
                           </Button>
                         </div>
                       </CardContent>

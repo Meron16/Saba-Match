@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { jobService } from "@/lib/services/jobService";
 import { Job } from "@/lib/services/jobService";
 import { X, Save, FileText } from "lucide-react";
+import { useI18n } from "@/lib/i18n/context";
 
 interface JobPostingFormProps {
   job?: Job | null;
@@ -16,6 +17,7 @@ interface JobPostingFormProps {
 
 export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFormProps) {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
@@ -141,7 +143,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5" />
-              {job ? "Edit Job" : "Post New Job"}
+              {job ? t.jobs.editJob : t.jobs.postNewJob}
             </CardTitle>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="w-4 h-4" />
@@ -152,11 +154,11 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t.profile.personalInfo}</h3>
               
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Job Title *
+                  {t.jobs.title} *
                 </label>
                 <input
                   type="text"
@@ -171,7 +173,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Job Description *
+                  {t.jobs.description} *
                 </label>
                 <textarea
                   name="description"
@@ -187,7 +189,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Job Type *
+                    {t.jobs.type} *
                   </label>
                   <select
                     name="type"
@@ -196,16 +198,16 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   >
-                    <option value="Full Time">Full Time</option>
-                    <option value="Part Time">Part Time</option>
-                    <option value="Contract">Contract</option>
-                    <option value="Internship">Internship</option>
+                    <option value="Full Time">{t.jobs.fullTime}</option>
+                    <option value="Part Time">{t.jobs.partTime}</option>
+                    <option value="Contract">{t.jobs.contract}</option>
+                    <option value="Internship">{t.jobs.internship}</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Category
+                    {t.jobs.category}
                   </label>
                   <select
                     name="category"
@@ -213,7 +215,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   >
-                    <option value="">Select category</option>
+                    <option value="">{t.common.select} {t.jobs.category}</option>
                     {categories.map((cat) => (
                       <option key={cat} value={cat}>
                         {cat}
@@ -226,11 +228,11 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
             {/* Location Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Location Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t.jobs.location} {t.profile.personalInfo}</h3>
               
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Location *
+                  {t.jobs.location} *
                 </label>
                 <input
                   type="text"
@@ -246,7 +248,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    City
+                    {t.jobs.city}
                   </label>
                   <input
                     type="text"
@@ -259,7 +261,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Region
+                    {t.jobs.region}
                   </label>
                   <select
                     name="region"
@@ -267,7 +269,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   >
-                    <option value="">Select region</option>
+                    <option value="">{t.common.select} {t.jobs.region}</option>
                     {regions.map((region) => (
                       <option key={region} value={region}>
                         {region}
@@ -278,7 +280,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Country
+                    {t.jobs.country}
                   </label>
                   <input
                     type="text"
@@ -294,12 +296,12 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
             {/* Salary Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Salary & Benefits</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t.jobs.salary} {t.common.and} {t.common.view}</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Salary
+                    {t.jobs.salary}
                   </label>
                   <input
                     type="text"
@@ -313,7 +315,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Salary Type
+                    {t.jobs.salaryType}
                   </label>
                   <select
                     name="salaryType"
@@ -321,9 +323,9 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
                     onChange={handleInputChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   >
-                    <option value="Monthly">Monthly</option>
-                    <option value="Annual">Annual</option>
-                    <option value="Hourly">Hourly</option>
+                    <option value="Monthly">{t.jobs.monthly}</option>
+                    <option value="Annual">{t.jobs.annual}</option>
+                    <option value="Hourly">{t.jobs.hourly}</option>
                   </select>
                 </div>
               </div>
@@ -331,12 +333,12 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
             {/* Requirements */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Requirements</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{t.jobs.requirements}</h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Education
+                    {t.jobs.education}
                   </label>
                   <input
                     type="text"
@@ -350,7 +352,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Experience
+                    {t.jobs.experience}
                   </label>
                   <input
                     type="text"
@@ -365,7 +367,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Additional Requirements
+                  {t.jobs.requirements} {t.common.view}
                 </label>
                 <textarea
                   name="requirements"
@@ -380,7 +382,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Number of Vacancies *
+                    {t.jobs.vacancies} *
                   </label>
                   <input
                     type="number"
@@ -395,7 +397,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Application Deadline
+                    {t.jobs.deadline}
                   </label>
                   <input
                     type="date"
@@ -411,7 +413,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
             {/* Status */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Status *
+                {t.jobs.status} *
               </label>
               <select
                 name="status"
@@ -420,16 +422,16 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               >
-                <option value="draft">Draft</option>
-                <option value="active">Active (Publish Now)</option>
-                <option value="closed">Closed</option>
+                <option value="draft">{t.jobs.draft}</option>
+                <option value="active">{t.jobs.active}</option>
+                <option value="closed">{t.jobs.closed}</option>
               </select>
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center justify-end gap-4 pt-4 border-t">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                {t.common.cancel}
               </Button>
               <Button
                 type="submit"
@@ -437,7 +439,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
                 className="bg-orange-500 hover:bg-orange-600 text-white"
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSubmitting ? "Saving..." : job ? "Update Job" : "Post Job"}
+                {isSubmitting ? t.common.save + "..." : job ? t.jobs.editJob : t.jobs.postNewJob}
               </Button>
             </div>
           </form>

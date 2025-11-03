@@ -5,8 +5,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function SigninForm() {
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -50,13 +52,13 @@ export default function SigninForm() {
             router.push("/dashboard/user");
           }
         } else {
-          setError("Failed to retrieve user information. Please try again.");
+          setError(t.auth.somethingWentWrong);
         }
       } else {
-        setError("Invalid email or password. Please try again.");
+        setError(t.auth.invalidCredentials);
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError(t.auth.somethingWentWrong);
     } finally {
       setIsLoading(false);
     }
@@ -68,10 +70,10 @@ export default function SigninForm() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-            Welcome Back
+            {t.auth.welcomeBack}
           </h1>
           <p className="text-gray-600 text-sm font-medium">
-            Sign in to your account to continue
+            {t.auth.signInToContinue}
           </p>
         </div>
 
@@ -87,12 +89,12 @@ export default function SigninForm() {
           {/* Email Field */}
           <div className="relative">
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Email Address
+              {t.auth.email}
             </label>
             <input
               type="email"
               name="email"
-              placeholder="you@example.com"
+              placeholder={t.auth.email}
               value={formData.email}
               onChange={handleChange}
               className="w-full px-5 py-3 border border-gray-300 rounded-xl bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#FF9833] focus:ring-2 focus:ring-[#FF9833]/30 transition shadow-sm"
@@ -104,13 +106,13 @@ export default function SigninForm() {
           <div className="relative">
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-semibold text-gray-900">
-                Password
+                {t.auth.password}
               </label>
               <a
                 href="#"
                 className="text-xs text-[#FF9833] hover:text-[#FF8C1A] font-medium"
               >
-                Forgot?
+                {t.auth.forgotPassword}
               </a>
             </div>
             <input
@@ -130,7 +132,7 @@ export default function SigninForm() {
             disabled={isLoading}
             className="w-full py-3 bg-[#FF9833] hover:bg-[#FF8C1A] active:bg-[#FF7A00] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-base rounded-xl transition duration-300 shadow-md hover:shadow-lg"
           >
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isLoading ? t.auth.signingIn : t.auth.signIn}
           </button>
         </form>
 
@@ -143,12 +145,12 @@ export default function SigninForm() {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-600">
-          Don't have an account?{" "}
+          {t.auth.dontHaveAccount}{" "}
           <Link
             href="/signup"
             className="text-[#FF9833] hover:text-[#FF8C1A] font-semibold"
           >
-            Sign Up
+            {t.auth.signUp}
           </Link>
         </p>
       </div>

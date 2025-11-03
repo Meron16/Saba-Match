@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/Components/ui/badge";
 import { Button } from "@/Components/ui/button";
 import { Card, CardContent } from "@/Components/ui/card";
+import { useI18n } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/Components/ui/language-switcher";
 import {
   SearchIcon,
   BriefcaseIcon,
@@ -202,6 +204,7 @@ const APPLICATIONS: Application[] = [
 // ============================================================
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const { t } = useI18n();
   const [selectedJobId, setSelectedJobId] = useState<string>("1");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -263,9 +266,12 @@ export default function Dashboard() {
       <div className="bg-white border-b border-gray-200 px-6 md:px-8 py-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-black">Dashboard</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-bold text-black">{t.dashboard.welcome} - {t.roles.jobSeeker} {t.dashboard.dashboard}</h1>
+              <LanguageSwitcher />
+            </div>
             <p className="text-gray-600 mt-1">
-              Welcome back! Here's your recruitment journey.
+              {t.dashboardStrings.welcomeBack} {t.dashboardStrings.recruitmentJourney}
             </p>
           </div>
 
@@ -274,15 +280,15 @@ export default function Dashboard() {
             <Link href="/profile">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-5 py-2 font-medium">
                 <User className="w-4 h-4 mr-2" />
-                My Profile
+                {t.nav.profile}
               </Button>
             </Link>
             <div className="flex items-center gap-3 bg-white rounded-lg border border-gray-200 px-4 py-2 cursor-pointer hover:bg-gray-50 transition-colors">
               <div className="text-right">
                 <p className="text-sm font-semibold text-black">
-                  {user?.fullName || "User"}
+                  {user?.fullName || t.roles.user}
                 </p>
-                <p className="text-xs text-gray-600">Job Seeker</p>
+                <p className="text-xs text-gray-600">{t.roles.jobSeeker}</p>
               </div>
               <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold">
                 {userInitials}
@@ -294,7 +300,7 @@ export default function Dashboard() {
               className="border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              {t.nav.logout}
             </Button>
           </div>
         </div>
@@ -314,18 +320,17 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-1">
-                        Complete Your Profile
+                        {t.dashboardStrings.completeProfile}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        Add your CV, skills, and certificates to stand out to
-                        employers
+                        {t.dashboardStrings.completeProfileDesc}
                       </p>
                     </div>
                   </div>
                   <Link href="/profile">
                     <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 py-3 font-semibold shadow-lg">
                       <Settings className="w-4 h-4 mr-2" />
-                      Manage Profile
+                      {t.profile.editProfile}
                     </Button>
                   </Link>
                 </div>
@@ -366,7 +371,7 @@ export default function Dashboard() {
                 <SearchIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search for job"
+                  placeholder={t.dashboardStrings.searchForJob}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -376,10 +381,10 @@ export default function Dashboard() {
               {/* TABS - All Jobs / Saved Jobs */}
               <div className="flex gap-6 mb-6 border-b border-gray-200 pb-4">
                 <button className="text-sm font-medium text-gray-600 border-b-2 border-orange-500 pb-2 text-orange-500">
-                  All jobs
+                  {t.dashboardStrings.allJobs}
                 </button>
                 <button className="text-sm font-medium text-gray-600 hover:text-black">
-                  Saved jobs
+                  {t.dashboardStrings.savedJobs}
                 </button>
               </div>
 
@@ -480,7 +485,7 @@ export default function Dashboard() {
                 {/* BACK BUTTON */}
                 <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-black mb-4">
                   <ArrowLeft className="w-4 h-4" />
-                  Back
+                  {t.common.back}
                 </button>
 
                 {/* JOB HEADER */}
@@ -602,7 +607,7 @@ export default function Dashboard() {
                 {/* ACTION BUTTONS */}
                 <div className="space-y-3 mb-6">
                   <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full py-3 font-semibold">
-                    Apply now
+                    {t.dashboardStrings.applyNow}
                   </Button>
                   <div className="grid grid-cols-2 gap-3">
                     <Button
@@ -610,7 +615,7 @@ export default function Dashboard() {
                       className="border-red-400 text-red-500 hover:bg-red-50 rounded-full bg-transparent"
                     >
                       <Bookmark className="w-4 h-4 mr-2" />
-                      Save Job
+                      {t.common.save} {t.jobs.title}
                     </Button>
                     <Button
                       variant="outline"

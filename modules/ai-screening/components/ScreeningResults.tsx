@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
 import { Badge } from "@/Components/ui/badge";
 import type { CandidateScore } from "@/lib/ai/types";
+import { useI18n } from "@/lib/i18n/context";
 import {
   TrendingUp,
   TrendingDown,
@@ -35,6 +36,7 @@ export default function ScreeningResults({
   preloadedRankings,
   preloadedStats
 }: ScreeningResultsProps) {
+  const { t } = useI18n();
   const [selectedJobId, setSelectedJobId] = useState<string>(jobId || "");
   const [rankings, setRankings] = useState<CandidateScore[]>(preloadedRankings || []);
   const [isLoading, setIsLoading] = useState(false);
@@ -117,11 +119,11 @@ export default function ScreeningResults({
   };
 
   const getRecommendation = (score: number) => {
-    if (score >= 90) return { text: "Highly Recommended", icon: Award };
-    if (score >= 75) return { text: "Strong Match", icon: CheckCircle };
-    if (score >= 60) return { text: "Good Match", icon: AlertCircle };
-    if (score >= 40) return { text: "Moderate Match", icon: AlertCircle };
-    return { text: "Limited Match", icon: XCircle };
+    if (score >= 90) return { text: t.screening.highlyRecommended, icon: Award };
+    if (score >= 75) return { text: t.screening.strongMatch, icon: CheckCircle };
+    if (score >= 60) return { text: t.screening.goodMatch, icon: AlertCircle };
+    if (score >= 40) return { text: t.screening.moderateMatch, icon: AlertCircle };
+    return { text: t.screening.limitedMatch, icon: XCircle };
   };
 
   if (isLoading) {
@@ -142,22 +144,22 @@ export default function ScreeningResults({
         <CardContent className="pt-6">
           <div className="text-center py-12">
             <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg mb-2">No applications screened yet</p>
-            <p className="text-gray-500 text-sm mb-6">
-              {selectedJobId 
-                ? "Click 'Screen All Applications' to analyze candidates for this job"
-                : "Select a job first, then click 'Screen All Applications'"}
-            </p>
-            {selectedJobId && (
-              <Button
-                onClick={screenAllApplications}
-                className="bg-orange-500 hover:bg-orange-600 text-white"
-                disabled={isLoading}
-              >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
-                Screen All Applications
-              </Button>
-            )}
+                <p className="text-gray-600 text-lg mb-2">{t.screening.noCandidates}</p>
+                <p className="text-gray-500 text-sm mb-6">
+                  {selectedJobId 
+                    ? t.screening.selectJob
+                    : t.screening.selectJob}
+                </p>
+                {selectedJobId && (
+                  <Button
+                    onClick={screenAllApplications}
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                    disabled={isLoading}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                    {t.screening.screenAll}
+                  </Button>
+                )}
           </div>
         </CardContent>
       </Card>
@@ -173,7 +175,7 @@ export default function ScreeningResults({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Total Candidates</p>
+                  <p className="text-sm text-gray-600 mb-1">{t.screening.totalCandidates}</p>
                   <p className="text-2xl font-bold text-black">
                     {stats.totalCandidates}
                   </p>
@@ -187,7 +189,7 @@ export default function ScreeningResults({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Average Score</p>
+                  <p className="text-sm text-gray-600 mb-1">{t.screening.averageScore}</p>
                   <p className="text-2xl font-bold text-black">
                     {stats.averageScore}
                   </p>
@@ -201,7 +203,7 @@ export default function ScreeningResults({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Top Score</p>
+                  <p className="text-sm text-gray-600 mb-1">{t.screening.topScore}</p>
                   <p className="text-2xl font-bold text-green-600">
                     {stats.topScore}
                   </p>
@@ -215,7 +217,7 @@ export default function ScreeningResults({
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Lowest Score</p>
+                  <p className="text-sm text-gray-600 mb-1">{t.screening.lowestScore}</p>
                   <p className="text-2xl font-bold text-red-600">
                     {stats.lowestScore}
                   </p>
@@ -233,7 +235,7 @@ export default function ScreeningResults({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Award className="w-5 h-5" />
-              Candidate Rankings
+              {t.screening.ranking}
             </CardTitle>
             <Button
               onClick={screenAllApplications}
@@ -242,7 +244,7 @@ export default function ScreeningResults({
               disabled={isLoading}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
+              {t.common.update}
             </Button>
           </div>
         </CardHeader>
@@ -277,10 +279,10 @@ export default function ScreeningResults({
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="text-lg font-bold text-black">
-                                Candidate #{candidate.candidateId.slice(0, 8)}
+                                {t.dashboard.candidates} #{candidate.candidateId.slice(0, 8)}
                               </h3>
                               <Badge className={getScoreBadgeColor(candidate.overallScore)}>
-                                {candidate.overallScore}% Match
+                                {candidate.overallScore}% {t.screening.matchPercentage}
                               </Badge>
                               <Badge
                                 variant="outline"
@@ -299,7 +301,7 @@ export default function ScreeningResults({
                         {/* Score Breakdown */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                           <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-600 mb-1">Skill Match</p>
+                            <p className="text-xs text-gray-600 mb-1">{t.screening.score}</p>
                             <p className={`text-lg font-bold ${getScoreColor(candidate.skillMatchScore)}`}>
                               {candidate.skillMatchScore}%
                             </p>
@@ -308,14 +310,14 @@ export default function ScreeningResults({
                             </p>
                           </div>
                           <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-600 mb-1">Experience</p>
+                            <p className="text-xs text-gray-600 mb-1">{t.jobs.experience}</p>
                             <p className={`text-lg font-bold ${getScoreColor(candidate.experienceScore)}`}>
                               {candidate.experienceScore}%
                             </p>
                             <p className="text-xs text-gray-500">Relevant work history</p>
                           </div>
                           <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-600 mb-1">Education</p>
+                            <p className="text-xs text-gray-600 mb-1">{t.jobs.education}</p>
                             <p className={`text-lg font-bold ${getScoreColor(candidate.educationScore)}`}>
                               {candidate.educationScore}%
                             </p>
@@ -329,7 +331,7 @@ export default function ScreeningResults({
                             <div>
                               <p className="text-sm font-semibold text-green-700 mb-2 flex items-center gap-1">
                                 <CheckCircle className="w-4 h-4" />
-                                Strengths
+                                {t.screening.strengths}
                               </p>
                               <ul className="space-y-1">
                                 {candidate.strengths.map((strength, idx) => (
@@ -344,7 +346,7 @@ export default function ScreeningResults({
                             <div>
                               <p className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-1">
                                 <AlertCircle className="w-4 h-4" />
-                                Areas for Improvement
+                                {t.screening.weaknesses}
                               </p>
                               <ul className="space-y-1">
                                 {candidate.weaknesses.map((weakness, idx) => (

@@ -1,41 +1,42 @@
 "use client"
 
+import { useI18n } from "@/lib/i18n/context"
+
 export default function Service() {
+  const { t } = useI18n()
+  
   const services = [
     {
-      title: "AI-Powered Recruitment",
-      description:
-        "Leverage advanced artificial intelligence to streamline your hiring process, identify top talent faster, and make data-driven decisions that transform your recruitment strategy.",
+      title: t.home.services.aiRecruitment,
+      description: t.home.services.aiRecruitmentDesc,
       icon: "⚡",
     },
     {
-      title: "Candidate Intelligence",
-      description:
-        "Gain deep insights into candidate profiles with intelligent matching algorithms that evaluate skills, experience, and cultural fit with precision.",
+      title: t.home.services.candidateIntelligence,
+      description: t.home.services.candidateIntelligenceDesc,
       icon: "🧠",
     },
     {
-      title: "24/7 Engagement Hub",
-      description:
-        "Keep candidates engaged throughout the entire hiring journey with real-time communication, automated updates, and personalized interactions.",
+      title: t.home.services.engagementHub,
+      description: t.home.services.engagementHubDesc,
       icon: "💬",
     },
   ]
 
   const keyFeatures = [
     {
-      title: "Resume Screening",
-      description: "Analyze and rank Candidates",
+      title: t.home.services.resumeScreening,
+      description: t.home.services.resumeScreeningDesc,
       icon: "📄",
     },
     {
-      title: "Candidate Matching",
-      description: "Matches Skill and Preference",
+      title: t.home.services.candidateMatching,
+      description: t.home.services.candidateMatchingDesc,
       icon: "🤝",
     },
     {
-      title: "Interview Scheduling",
-      description: "Improve candidate Engagement",
+      title: t.home.services.interviewScheduling,
+      description: t.home.services.interviewSchedulingDesc,
       icon: "📅",
     },
   ]
@@ -47,11 +48,10 @@ export default function Service() {
         <div className="mb-24">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Our <span className="text-[#FF9833]">Service</span>
+              {t.home.services.title}
             </h2>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
-              We revolutionize talent acquisition with intelligent solutions designed to transform how you find,
-              evaluate, and engage top candidates in today's competitive market.
+              {t.home.services.description}
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export default function Service() {
      {/* KEY FEATURES SECTION - CREATIVE NEW LAYOUT */}
 <div className="border-t-2 border-gray-100 pt-20">
   <h2 className="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-16">
-    Key <span className="text-[#FF9833]">Features</span>
+    {t.home.services.keyFeatures}
   </h2>
 
   <div className="flex flex-col md:flex-row md:justify-between gap-10 max-w-6xl mx-auto">

@@ -2,8 +2,10 @@
 
 import type React from "react"
 import { useState } from "react"
+import { useI18n } from "@/lib/i18n/context"
 
 export default function Contact() {
+  const { t } = useI18n()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,18 +35,18 @@ export default function Contact() {
         <div className="w-full md:w-[70%] lg:w-[60%] px-4 md:px-12 lg:px-24 xl:px-32 py-12 flex items-center">
           <div className="w-full max-w-md mx-auto md:mx-0">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
-              Get in <span className="text-[#FF9833]">Touch</span>
+              {t.home.contact.title}
             </h1>
 
             <p className="text-gray-600 text-sm mb-8 leading-relaxed font-medium">
-              Email will be used to give you news and great deals
+              {t.home.contact.description}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4 mb-8">
               <input
                 type="text"
                 name="name"
-                placeholder="Name *"
+                placeholder={`${t.home.contact.name} *`}
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#FF9833] focus:ring-1 focus:ring-[#FF9833] transition"
@@ -54,7 +56,7 @@ export default function Contact() {
               <input
                 type="email"
                 name="email"
-                placeholder="Email"
+                placeholder={t.home.contact.email}
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#FF9833] focus:ring-1 focus:ring-[#FF9833] transition"
@@ -63,7 +65,7 @@ export default function Contact() {
               <input
                 type="tel"
                 name="phone"
-                placeholder="Phone number *"
+                placeholder={`${t.home.contact.phoneNumber} *`}
                 value={formData.phone}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#FF9833] focus:ring-1 focus:ring-[#FF9833] transition"
@@ -82,18 +84,18 @@ export default function Contact() {
                   paddingRight: "2.5rem",
                 }}
               >
-                <option value="">How did you find us?</option>
-                <option value="google">Google</option>
-                <option value="social">Social Media</option>
-                <option value="friend">Friend</option>
-                <option value="other">Other</option>
+                <option value="">{t.home.contact.howDidYouFindUs}</option>
+                <option value="google">{t.home.contact.google}</option>
+                <option value="social">{t.home.contact.socialMedia}</option>
+                <option value="friend">{t.home.contact.friend}</option>
+                <option value="other">{t.home.contact.other}</option>
               </select>
 
               <button
                 type="submit"
                 className="w-full py-3 bg-[#FF9833] hover:bg-[#FF8C1A] active:bg-[#FF7A00] text-white font-bold text-base rounded-md transition duration-200 mt-6"
               >
-                SEND
+                {t.home.contact.send}
               </button>
             </form>
 
@@ -108,7 +110,7 @@ export default function Contact() {
                   <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 <div>
-                  <p className="text-xs font-bold text-gray-900 tracking-wide">PHONE</p>
+                  <p className="text-xs font-bold text-gray-900 tracking-wide">{t.home.contact.phoneLabel}</p>
                   <p className="text-xs text-gray-700">09-6452-1234</p>
                 </div>
               </div>
@@ -123,7 +125,7 @@ export default function Contact() {
                   <path d="M8 16H6a2 2 0 01-2-2V9m0 0V7a2 2 0 012-2h12a2 2 0 012 2v2m0 0v2a2 2 0 01-2 2h-2.5l-4.793 4.793a1 1 0 01-1.414-1.414L12.586 12H10a2 2 0 01-2-2m0-5V7a2 2 0 012-2h6a2 2 0 012 2v2" />
                 </svg>
                 <div>
-                  <p className="text-xs font-bold text-gray-900 tracking-wide">FAX</p>
+                  <p className="text-xs font-bold text-gray-900 tracking-wide">{t.home.contact.faxLabel}</p>
                   <p className="text-xs text-[#FF9833] font-semibold">03-5432-1234</p>
                 </div>
               </div>
@@ -138,7 +140,7 @@ export default function Contact() {
                   <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <div>
-                  <p className="text-xs font-bold text-gray-900 tracking-wide">EMAIL</p>
+                  <p className="text-xs font-bold text-gray-900 tracking-wide">{t.home.contact.emailLabel}</p>
                   <p className="text-xs text-[#FF9833] font-semibold">info@slui.com</p>
                 </div>
               </div>

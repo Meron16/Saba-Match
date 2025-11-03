@@ -5,8 +5,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useI18n } from "@/lib/i18n/context";
 
 export default function SignupForm() {
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -36,12 +38,12 @@ export default function SignupForm() {
     setError("");
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match!");
+      setError(t.auth.passwordsDoNotMatch);
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long!");
+      setError(t.auth.passwordTooShort);
       return;
     }
 
@@ -66,12 +68,10 @@ export default function SignupForm() {
           router.push("/dashboard/user");
         }
       } else {
-        setError(
-          "An account with this email already exists. Please sign in instead."
-        );
+        setError(t.auth.accountExists);
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      setError(t.auth.somethingWentWrong);
     } finally {
       setIsLoading(false);
     }
@@ -84,10 +84,10 @@ export default function SignupForm() {
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Create Account
+            {t.auth.createAccount}
           </h1>
           <p className="text-gray-600 text-sm font-medium">
-            Join us today and get started in minutes
+            {t.auth.joiningUs}
           </p>
         </div>
 
@@ -103,12 +103,12 @@ export default function SignupForm() {
           {/* Full Name */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Full Name
+              {t.auth.fullName}
             </label>
             <input
               type="text"
               name="fullName"
-              placeholder="John Doe"
+              placeholder={t.auth.fullName}
               value={formData.fullName}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#FF9833] focus:ring-2 focus:ring-[#FF9833]/20 transition"
@@ -119,12 +119,12 @@ export default function SignupForm() {
           {/* Email */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Email Address
+              {t.auth.email}
             </label>
             <input
               type="email"
               name="email"
-              placeholder="you@example.com"
+              placeholder={t.auth.email}
               value={formData.email}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white text-gray-900 placeholder-gray-400 text-sm focus:outline-none focus:border-[#FF9833] focus:ring-2 focus:ring-[#FF9833]/20 transition"
@@ -135,7 +135,7 @@ export default function SignupForm() {
           {/* Password */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Password
+              {t.auth.password}
             </label>
             <input
               type="password"
@@ -151,7 +151,7 @@ export default function SignupForm() {
           {/* Confirm Password */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Confirm Password
+              {t.auth.confirmPassword}
             </label>
             <input
               type="password"
@@ -167,7 +167,7 @@ export default function SignupForm() {
           {/* Account Type */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Account Type
+              {t.auth.accountType}
             </label>
             <select
               name="role"
@@ -181,9 +181,9 @@ export default function SignupForm() {
                 paddingRight: "2.5rem",
               }}
             >
-              <option value="user">Individual User</option>
-              <option value="company">Company</option>
-              <option value="government">Government User</option>
+              <option value="user">{t.auth.individualUser}</option>
+              <option value="company">{t.roles.company}</option>
+              {/* Government option removed - only accessible through login with credentials */}
             </select>
           </div>
 
@@ -193,7 +193,7 @@ export default function SignupForm() {
             disabled={isLoading}
             className="w-full py-3 bg-[#FF9833] hover:bg-[#FF8C1A] active:bg-[#FF7A00] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-base rounded-lg transition duration-200 mt-6"
           >
-            {isLoading ? "Creating Account..." : "Sign Up"}
+            {isLoading ? t.auth.creatingAccount : t.auth.signUp}
           </button>
         </form>
 
@@ -206,12 +206,12 @@ export default function SignupForm() {
 
         {/* Footer */}
         <p className="text-center text-sm text-gray-600">
-          Already have an account?{" "}
+          {t.auth.alreadyHaveAccount}{" "}
           <Link
             href="/signin"
             className="text-[#FF9833] hover:text-[#FF8C1A] font-semibold"
           >
-            Sign In
+            {t.auth.signIn}
           </Link>
         </p>
       </div>
