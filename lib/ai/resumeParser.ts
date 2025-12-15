@@ -12,6 +12,7 @@ export type { ParsedResume, WorkHistoryItem } from "./types";
 export async function parsePDFResume(fileBuffer: Buffer): Promise<ParsedResume> {
   try {
     // Dynamically import pdf-parse to avoid SSR issues
+    // @ts-ignore - pdf-parse doesn't have type definitions
     const pdfParseModule: any = await import("pdf-parse");
     // pdf-parse can be exported as default, named, or directly
     const pdfParse = pdfParseModule.default || pdfParseModule.pdfParse || pdfParseModule;

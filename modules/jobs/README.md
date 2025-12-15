@@ -1,6 +1,6 @@
 # Module 3: Job Posting & Management
 
-This module handles job creation, editing, and management by companies in the AI Recruiter platform.
+This module handles job creation, editing, and management by companies in the Saba Match platform, focusing on remote work opportunities for girls and women.
 
 ## Overview
 
@@ -59,7 +59,7 @@ lib/
 - Job type
 
 ### Data Persistence
-All jobs are stored in `localStorage` under the key `airecruiter_jobs`. This ensures:
+All jobs are stored in `localStorage` under the key `sabamatch_jobs`. This ensures:
 - Jobs persist across browser sessions
 - Fast access without server dependency
 - Works offline

@@ -1,5 +1,7 @@
-// Job Service - Handles job operations with localStorage
-// This service manages all job-related operations using localStorage for persistence
+// Job Service - Handles job operations with PostgreSQL database
+// This service manages all job-related operations using Prisma
+
+import { prisma } from "@/lib/prisma";
 
 export interface Job {
   id: string;
@@ -27,11 +29,7 @@ export interface Job {
   updatedAt: string;
 }
 
-const JOBS_STORAGE_KEY = "airecruiter_jobs";
-const JOB_CATEGORIES_KEY = "airecruiter_job_categories";
-const JOB_REGIONS_KEY = "airecruiter_job_regions";
-
-// Initialize with default categories and regions
+// Default categories and regions (can be stored in database later)
 const DEFAULT_CATEGORIES = [
   "Technology",
   "Healthcare",
@@ -59,202 +57,290 @@ const DEFAULT_REGIONS = [
   "Other",
 ];
 
+// Helper function to convert Prisma Job to Job interface
+function prismaJobToJob(prismaJob: any): Job {
+  return {
+    id: prismaJob.id,
+    title: prismaJob.title,
+    description: prismaJob.description,
+    companyId: prismaJob.companyId,
+    companyName: prismaJob.companyName || prismaJob.company?.fullName || "Company",
+    location: prismaJob.location,
+    city: prismaJob.city || undefined,
+    region: prismaJob.region || undefined,
+    country: prismaJob.country || undefined,
+    salary: prismaJob.salary || undefined,
+    salaryType: prismaJob.salaryType as "Monthly" | "Annual" | "Hourly" | undefined,
+    type: prismaJob.type as "Full Time" | "Part Time" | "Contract" | "Internship",
+    requirements: prismaJob.requirements || undefined,
+    education: prismaJob.education || undefined,
+    experience: prismaJob.experience || undefined,
+    vacancies: prismaJob.vacancies,
+    category: prismaJob.category || undefined,
+    postedDate: prismaJob.postedDate.toISOString(),
+    deadline: prismaJob.deadline?.toISOString() || undefined,
+    isActive: prismaJob.isActive,
+    status: prismaJob.isActive ? "active" : "closed" as "active" | "closed" | "draft",
+    createdAt: prismaJob.createdAt.toISOString(),
+    updatedAt: prismaJob.updatedAt.toISOString(),
+  };
+}
+
 // Job Service Functions
 export const jobService = {
-  // Initialize default data
-  initializeDefaults() {
-    if (typeof window === "undefined") return;
-    
-    // Initialize categories
-    if (!localStorage.getItem(JOB_CATEGORIES_KEY)) {
-      localStorage.setItem(JOB_CATEGORIES_KEY, JSON.stringify(DEFAULT_CATEGORIES));
-    }
-    
-    // Initialize regions
-    if (!localStorage.getItem(JOB_REGIONS_KEY)) {
-      localStorage.setItem(JOB_REGIONS_KEY, JSON.stringify(DEFAULT_REGIONS));
-    }
-  },
-
   // Get all jobs
-  getAllJobs(): Job[] {
-    if (typeof window === "undefined") return [];
+  async getAllJobs(): Promise<Job[]> {
     try {
-      const jobsJson = localStorage.getItem(JOBS_STORAGE_KEY);
-      return jobsJson ? JSON.parse(jobsJson) : [];
+      const jobs = await prisma.job.findMany({
+        include: {
+          company: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      return jobs.map(prismaJobToJob);
     } catch (error) {
-      console.error("Error reading jobs from localStorage:", error);
+      console.error("Error reading jobs from database:", error);
       return [];
     }
   },
 
   // Get jobs by company ID
-  getJobsByCompany(companyId: string): Job[] {
-    const allJobs = this.getAllJobs();
-    return allJobs.filter((job) => job.companyId === companyId);
+  async getJobsByCompany(companyId: string): Promise<Job[]> {
+    try {
+      const jobs = await prisma.job.findMany({
+        where: { companyId },
+        include: {
+          company: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      return jobs.map(prismaJobToJob);
+    } catch (error) {
+      console.error("Error reading jobs by company:", error);
+      return [];
+    }
   },
 
   // Get active jobs
-  getActiveJobs(): Job[] {
-    const allJobs = this.getAllJobs();
-    return allJobs.filter((job) => job.isActive && job.status === "active");
+  async getActiveJobs(): Promise<Job[]> {
+    try {
+      const jobs = await prisma.job.findMany({
+        where: { isActive: true },
+        include: {
+          company: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      return jobs.map(prismaJobToJob);
+    } catch (error) {
+      console.error("Error reading active jobs:", error);
+      return [];
+    }
   },
 
   // Get job by ID
-  getJobById(jobId: string): Job | null {
-    const allJobs = this.getAllJobs();
-    return allJobs.find((job) => job.id === jobId) || null;
+  async getJobById(jobId: string): Promise<Job | null> {
+    try {
+      const job = await prisma.job.findUnique({
+        where: { id: jobId },
+        include: {
+          company: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+      });
+      return job ? prismaJobToJob(job) : null;
+    } catch (error) {
+      console.error("Error reading job by ID:", error);
+      return null;
+    }
   },
 
   // Create new job
-  createJob(jobData: Omit<Job, "id" | "postedDate" | "createdAt" | "updatedAt">): Job {
-    const allJobs = this.getAllJobs();
-    const newJob: Job = {
-      ...jobData,
-      id: `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      postedDate: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      isActive: jobData.status === "active",
-    };
-    
-    allJobs.push(newJob);
-    this.saveJobs(allJobs);
-    return newJob;
+  async createJob(jobData: Omit<Job, "id" | "postedDate" | "createdAt" | "updatedAt">): Promise<Job> {
+    try {
+      const newJob = await prisma.job.create({
+        data: {
+          title: jobData.title,
+          description: jobData.description,
+          companyId: jobData.companyId,
+          companyName: jobData.companyName,
+          location: jobData.location,
+          city: jobData.city || null,
+          region: jobData.region || null,
+          country: jobData.country || null,
+          salary: jobData.salary || null,
+          salaryType: jobData.salaryType || null,
+          type: jobData.type,
+          requirements: jobData.requirements || null,
+          education: jobData.education || null,
+          experience: jobData.experience || null,
+          vacancies: jobData.vacancies,
+          category: jobData.category || null,
+          deadline: jobData.deadline ? new Date(jobData.deadline) : null,
+          isActive: jobData.status === "active",
+          postedDate: new Date(),
+        },
+        include: {
+          company: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+      });
+      return prismaJobToJob(newJob);
+    } catch (error) {
+      console.error("Error creating job:", error);
+      throw error;
+    }
   },
 
   // Update job
-  updateJob(jobId: string, updates: Partial<Job>): Job | null {
-    const allJobs = this.getAllJobs();
-    const index = allJobs.findIndex((job) => job.id === jobId);
-    
-    if (index === -1) return null;
-    
-    const updatedJob: Job = {
-      ...allJobs[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-      isActive: updates.status === "active" || (updates.status === undefined && allJobs[index].status === "active"),
-    };
-    
-    allJobs[index] = updatedJob;
-    this.saveJobs(allJobs);
-    return updatedJob;
+  async updateJob(jobId: string, updates: Partial<Job>): Promise<Job | null> {
+    try {
+      const updateData: any = {};
+      
+      if (updates.title !== undefined) updateData.title = updates.title;
+      if (updates.description !== undefined) updateData.description = updates.description;
+      if (updates.companyName !== undefined) updateData.companyName = updates.companyName;
+      if (updates.location !== undefined) updateData.location = updates.location;
+      if (updates.city !== undefined) updateData.city = updates.city || null;
+      if (updates.region !== undefined) updateData.region = updates.region || null;
+      if (updates.country !== undefined) updateData.country = updates.country || null;
+      if (updates.salary !== undefined) updateData.salary = updates.salary || null;
+      if (updates.salaryType !== undefined) updateData.salaryType = updates.salaryType || null;
+      if (updates.type !== undefined) updateData.type = updates.type;
+      if (updates.requirements !== undefined) updateData.requirements = updates.requirements || null;
+      if (updates.education !== undefined) updateData.education = updates.education || null;
+      if (updates.experience !== undefined) updateData.experience = updates.experience || null;
+      if (updates.vacancies !== undefined) updateData.vacancies = updates.vacancies;
+      if (updates.category !== undefined) updateData.category = updates.category || null;
+      if (updates.deadline !== undefined) updateData.deadline = updates.deadline ? new Date(updates.deadline) : null;
+      if (updates.status !== undefined) updateData.isActive = updates.status === "active";
+
+      const updatedJob = await prisma.job.update({
+        where: { id: jobId },
+        data: updateData,
+        include: {
+          company: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+      });
+      return prismaJobToJob(updatedJob);
+    } catch (error) {
+      console.error("Error updating job:", error);
+      return null;
+    }
   },
 
   // Delete job
-  deleteJob(jobId: string): boolean {
-    const allJobs = this.getAllJobs();
-    const filteredJobs = allJobs.filter((job) => job.id !== jobId);
-    
-    if (filteredJobs.length === allJobs.length) return false;
-    
-    this.saveJobs(filteredJobs);
-    return true;
-  },
-
-  // Save jobs to localStorage
-  saveJobs(jobs: Job[]): void {
-    if (typeof window === "undefined") return;
+  async deleteJob(jobId: string): Promise<boolean> {
     try {
-      localStorage.setItem(JOBS_STORAGE_KEY, JSON.stringify(jobs));
+      await prisma.job.delete({
+        where: { id: jobId },
+      });
+      return true;
     } catch (error) {
-      console.error("Error saving jobs to localStorage:", error);
+      console.error("Error deleting job:", error);
+      return false;
     }
   },
 
   // Search jobs
-  searchJobs(query: string, filters?: {
+  async searchJobs(query: string, filters?: {
     category?: string;
     location?: string;
     type?: string;
     status?: string;
-  }): Job[] {
-    let jobs = this.getAllJobs();
-    
-    // Apply search query
-    if (query) {
-      const lowerQuery = query.toLowerCase();
-      jobs = jobs.filter(
-        (job) =>
-          job.title.toLowerCase().includes(lowerQuery) ||
-          job.description.toLowerCase().includes(lowerQuery) ||
-          job.companyName.toLowerCase().includes(lowerQuery) ||
-          job.location.toLowerCase().includes(lowerQuery)
-      );
+  }): Promise<Job[]> {
+    try {
+      const where: any = {};
+
+      // Apply filters
+      if (filters?.category) {
+        where.category = filters.category;
+      }
+      if (filters?.type) {
+        where.type = filters.type;
+      }
+      if (filters?.status === "active") {
+        where.isActive = true;
+      } else if (filters?.status === "closed") {
+        where.isActive = false;
+      }
+
+      // Apply location filter
+      if (filters?.location) {
+        const locationLower = filters.location.toLowerCase();
+        where.OR = [
+          { location: { contains: locationLower, mode: "insensitive" } },
+          { city: { contains: locationLower, mode: "insensitive" } },
+          { region: { contains: locationLower, mode: "insensitive" } },
+          { country: { contains: locationLower, mode: "insensitive" } },
+        ];
+      }
+
+      // Apply search query
+      if (query) {
+        where.OR = [
+          { title: { contains: query, mode: "insensitive" } },
+          { description: { contains: query, mode: "insensitive" } },
+          { companyName: { contains: query, mode: "insensitive" } },
+          { location: { contains: query, mode: "insensitive" } },
+        ];
+      }
+
+      const jobs = await prisma.job.findMany({
+        where,
+        include: {
+          company: {
+            select: {
+              fullName: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+      return jobs.map(prismaJobToJob);
+    } catch (error) {
+      console.error("Error searching jobs:", error);
+      return [];
     }
-    
-    // Apply filters
-    if (filters) {
-      if (filters.category) {
-        jobs = jobs.filter((job) => job.category === filters.category);
-      }
-      if (filters.location) {
-        jobs = jobs.filter(
-          (job) =>
-            job.location.toLowerCase().includes(filters.location!.toLowerCase()) ||
-            job.city?.toLowerCase().includes(filters.location!.toLowerCase()) ||
-            job.region?.toLowerCase().includes(filters.location!.toLowerCase())
-        );
-      }
-      if (filters.type) {
-        jobs = jobs.filter((job) => job.type === filters.type);
-      }
-      if (filters.status) {
-        jobs = jobs.filter((job) => job.status === filters.status);
-      }
-    }
-    
-    return jobs;
   },
 
-  // Get categories
+  // Get categories (for now, return defaults - can be stored in DB later)
   getCategories(): string[] {
-    if (typeof window === "undefined") return DEFAULT_CATEGORIES;
-    try {
-      const categoriesJson = localStorage.getItem(JOB_CATEGORIES_KEY);
-      return categoriesJson ? JSON.parse(categoriesJson) : DEFAULT_CATEGORIES;
-    } catch (error) {
-      console.error("Error reading categories:", error);
-      return DEFAULT_CATEGORIES;
-    }
+    return DEFAULT_CATEGORIES;
   },
 
-  // Add category
-  addCategory(category: string): void {
-    if (typeof window === "undefined") return;
-    const categories = this.getCategories();
-    if (!categories.includes(category)) {
-      categories.push(category);
-      localStorage.setItem(JOB_CATEGORIES_KEY, JSON.stringify(categories));
-    }
-  },
-
-  // Get regions
+  // Get regions (for now, return defaults - can be stored in DB later)
   getRegions(): string[] {
-    if (typeof window === "undefined") return DEFAULT_REGIONS;
-    try {
-      const regionsJson = localStorage.getItem(JOB_REGIONS_KEY);
-      return regionsJson ? JSON.parse(regionsJson) : DEFAULT_REGIONS;
-    } catch (error) {
-      console.error("Error reading regions:", error);
-      return DEFAULT_REGIONS;
-    }
-  },
-
-  // Add region
-  addRegion(region: string): void {
-    if (typeof window === "undefined") return;
-    const regions = this.getRegions();
-    if (!regions.includes(region)) {
-      regions.push(region);
-      localStorage.setItem(JOB_REGIONS_KEY, JSON.stringify(regions));
-    }
+    return DEFAULT_REGIONS;
   },
 };
-
-// Initialize on module load (client-side only)
-if (typeof window !== "undefined") {
-  jobService.initializeDefaults();
-}
-

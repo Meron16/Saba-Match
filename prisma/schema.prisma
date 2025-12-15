@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -144,11 +144,16 @@ model Job {
   description   String
   companyId     String
   company       User     @relation("JobPoster", fields: [companyId], references: [id], onDelete: Cascade)
+  companyName   String?  // Company name for display
   
   location      String
+  city          String?
+  region        String?
+  country       String?
   salary        String?
-  salaryType    String? // "Monthly", "Annual", etc.
-  type          String // "Full Time", "Part Time", "Contract"
+  salaryType    String? // "Monthly", "Annual", "Hourly"
+  type          String // "Full Time", "Part Time", "Contract", "Internship"
+  category      String? // Job category
   
   requirements  String?
   education     String?
@@ -166,6 +171,8 @@ model Job {
 
   @@index([companyId])
   @@index([isActive])
+  @@index([category])
+  @@index([type])
 }
 
 model Application {

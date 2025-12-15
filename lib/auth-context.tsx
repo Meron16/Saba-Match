@@ -78,19 +78,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Not a government account, trying regular login");
       }
 
-      // Check if user exists in localStorage for regular users
-      const storedUsers = localStorage.getItem("users");
-      if (storedUsers) {
-        const users: User[] = JSON.parse(storedUsers);
-        const foundUser = users.find(
-          (u) => u.email === email.toLowerCase().trim()
-        );
+      // Try regular login via database API
+      const loginResponse = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
-        if (foundUser) {
-          // In production, verify password hash
-          // For now, we'll just check if user exists
-          setUser(foundUser);
-          localStorage.setItem("user", JSON.stringify(foundUser));
+      if (loginResponse.ok) {
+        const loginData = await loginResponse.json();
+        if (loginData.success && loginData.user) {
+          setUser(loginData.user);
+          localStorage.setItem("user", JSON.stringify(loginData.user));
           setIsLoading(false);
           return true;
         }
@@ -113,35 +112,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   ): Promise<boolean> => {
     setIsLoading(true);
     try {
-      // Simulate API call - In production, replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Create user via database API
+      const signupResponse = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, email, password, role }),
+      });
 
-      // Check if user already exists
-      const storedUsers = localStorage.getItem("users");
-      let users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
-
-      const emailLower = email.toLowerCase().trim();
-      if (users.some((u) => u.email === emailLower)) {
+      if (signupResponse.ok) {
+        const signupData = await signupResponse.json();
+        if (signupData.success && signupData.user) {
+          setUser(signupData.user);
+          localStorage.setItem("user", JSON.stringify(signupData.user));
+          setIsLoading(false);
+          return true;
+        }
+      } else {
+        const errorData = await signupResponse.json();
+        console.error("Signup error:", errorData.error);
         setIsLoading(false);
-        return false; // User already exists
+        return false;
       }
 
-      // Create new user
-      const newUser: User = {
-        id: Date.now().toString(),
-        fullName,
-        email: emailLower,
-        role,
-      };
-
-      // In production, hash password before storing
-      users.push(newUser);
-      localStorage.setItem("users", JSON.stringify(users));
-      setUser(newUser);
-      localStorage.setItem("user", JSON.stringify(newUser));
-
       setIsLoading(false);
-      return true;
+      return false;
     } catch (error) {
       console.error("Signup error:", error);
       setIsLoading(false);

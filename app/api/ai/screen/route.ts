@@ -3,7 +3,7 @@ import { parseResume } from "@/lib/ai/resumeParser";
 import { matchSkills } from "@/lib/ai/skillMatcher";
 import { rankCandidates, getRankingStats } from "@/lib/ai/rankCandidates";
 import type { JobRequirements, CandidateProfile, CandidateScore } from "@/lib/ai/types";
-import { jobService, Job } from "@/lib/services/jobService";
+import type { Job } from "@/lib/services/jobService";
 import { prisma } from "@/lib/prisma";
 import { readFile } from "fs/promises";
 import { join } from "path";
@@ -54,14 +54,15 @@ export async function POST(request: NextRequest) {
     }
     
     // Verify job belongs to user (company)
-    // Check both Prisma job and localStorage job
-    const job = application.job || jobService.getJobById(jobId);
+    const job = await prisma.job.findUnique({
+      where: { id: jobId },
+      select: { companyId: true, title: true, description: true, requirements: true, education: true, experience: true },
+    });
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
     
-    const jobCompanyId = job.companyId || job.companyId;
-    if (jobCompanyId !== userId) {
+    if (job.companyId !== userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
     
@@ -107,11 +108,11 @@ export async function POST(request: NextRequest) {
     
     // Prepare job requirements
     const jobRequirements: JobRequirements = {
-      title: application.job.title,
-      description: application.job.description,
-      education: application.job.education || undefined,
-      experience: application.job.experience || undefined,
-      requirements: application.job.requirements || undefined
+      title: job.title,
+      description: job.description || "",
+      education: job.education || undefined,
+      experience: job.experience || undefined,
+      requirements: job.requirements || undefined
     };
     
     // Prepare candidate profile
@@ -209,7 +210,11 @@ export async function PUT(request: NextRequest) {
     }
     
     // Verify job belongs to user
-    const job = jobService.getJobById(jobId);
+    const job = await prisma.job.findUnique({
+      where: { id: jobId },
+      select: { companyId: true },
+    });
+    
     if (!job) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
@@ -234,15 +239,26 @@ export async function PUT(request: NextRequest) {
       });
     } catch (error) {
       console.error("Error fetching applications from database:", error);
-      // If database query fails, return test data for demonstration
-      console.log("Using test data for demonstration");
-      return await testScreeningWithMockData();
+      return NextResponse.json({
+        success: false,
+        error: "Failed to fetch applications from database",
+        rankings: [],
+      }, { status: 500 });
     }
     
     if (applications.length === 0) {
-      // No real applications found - use test data for demonstration
-      console.log("No applications found for this job. Using test data for demonstration.");
-      return await testScreeningWithMockData();
+      // No real applications found - return empty result
+      return NextResponse.json({
+        success: true,
+        message: "No applications found for this job",
+        rankings: [],
+        statistics: {
+          totalCandidates: 0,
+          averageScore: 0,
+          topScore: 0,
+          lowestScore: 0,
+        },
+      }, { status: 200 });
     }
     
     // Screen all applications

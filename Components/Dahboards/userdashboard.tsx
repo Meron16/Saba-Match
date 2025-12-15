@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/Components/ui/badge";
@@ -8,6 +8,7 @@ import { Button } from "@/Components/ui/button";
 import { Card, CardContent } from "@/Components/ui/card";
 import { useI18n } from "@/lib/i18n/context";
 import { LanguageSwitcher } from "@/Components/ui/language-switcher";
+import JobApplicationForm from "@/Components/Jobs/JobApplicationForm";
 import {
   SearchIcon,
   BriefcaseIcon,
@@ -71,133 +72,7 @@ interface Application {
   status: "pending" | "reviewing" | "accepted" | "rejected";
 }
 
-// ============================================================
-// SAMPLE DATA
-// ============================================================
-const JOBS: Job[] = [
-  {
-    id: "1",
-    title: "Operation manager for furniture company",
-    company: "NAVE FURNITURE AND METAL MANUFACTURING PLC",
-    location: "Addis Ababa, Ethiopia",
-    salary: "Amount Not Specified",
-    posted: "2 days ago",
-    type: "Full Time",
-    badge: "BOT",
-  },
-  {
-    id: "2",
-    title: "Senior Frontend Developer",
-    company: "Tech Corp",
-    location: "San Francisco, CA",
-    salary: "$120k - $160k",
-    posted: "1 week ago",
-    type: "Full Time",
-  },
-  {
-    id: "3",
-    title: "Full Stack Engineer",
-    company: "StartUp Inc",
-    location: "Remote",
-    salary: "$100k - $140k",
-    posted: "3 days ago",
-    type: "Full Time",
-  },
-  {
-    id: "4",
-    title: "Product Manager",
-    company: "Innovation Labs",
-    location: "New York, NY",
-    salary: "$110k - $150k",
-    posted: "1 week ago",
-    type: "Full Time",
-  },
-];
-
-const JOB_DETAILS: { [key: string]: JobDetails } = {
-  "1": {
-    id: "1",
-    title: "Operation manager for furniture company",
-    company: "NAVE FURNITURE AND METAL MANUFACTURING PLC",
-    companyVerified: true,
-    jobsPosted: 8,
-    location: "Addis Ababa, Ethiopia",
-    postedDate: "November 1, 2025",
-    badge: "BOT",
-    type: "Onsite - Full Time",
-    deadline: "November 29, 2025",
-    vacancies: 1,
-    education: "Bachelors Degree",
-    salary: "Amount Not Specified",
-    salaryType: "Monthly",
-    experience: "SENIOR",
-    description: `At Nave furniture and metal manufacturing plc, we specialize in crafting high-quality furniture with a commitment to design, durability, and customer satisfaction. We are growing and looking for an experienced Operations Manager to lead our production and logistics teams.
-
-Key Responsibilities:
-- Plan and oversee daily production operations to meet quality and delivery targets.
-- Supervise factory staff and ensure workflow efficiency.
-- Manage procurement and inventory of raw materials.
-- Maintain quality control standards and ensure workplace safety.
-- Coordinate between departments to optimize processes.
-- Report on operational metrics and identify improvement opportunities.
-
-Requirements:
-- Bachelor's degree in Business, Operations, or related field
-- 5+ years of operations management experience
-- Strong leadership and problem-solving skills
-- Knowledge of production management systems`,
-  },
-  "2": {
-    id: "2",
-    title: "Senior Frontend Developer",
-    company: "Tech Corp",
-    companyVerified: true,
-    jobsPosted: 5,
-    location: "San Francisco, CA",
-    postedDate: "October 25, 2025",
-    badge: "TECH",
-    type: "Onsite - Full Time",
-    deadline: "November 10, 2025",
-    vacancies: 2,
-    education: "Bachelors Degree",
-    salary: "$120k - $160k",
-    salaryType: "Annual",
-    experience: "SENIOR",
-    description:
-      "We're looking for an experienced Senior Frontend Developer to join our team and help build amazing user experiences.",
-  },
-};
-
-const APPLICATIONS: Application[] = [
-  {
-    id: "1",
-    jobTitle: "Senior Frontend Developer",
-    company: "Tech Corp",
-    appliedDate: "2025-01-15",
-    status: "reviewing",
-  },
-  {
-    id: "2",
-    jobTitle: "Full Stack Engineer",
-    company: "StartUp Inc",
-    appliedDate: "2025-01-10",
-    status: "pending",
-  },
-  {
-    id: "3",
-    jobTitle: "UI/UX Designer",
-    company: "Design Studio",
-    appliedDate: "2024-12-28",
-    status: "accepted",
-  },
-  {
-    id: "4",
-    jobTitle: "Backend Developer",
-    company: "Old Company",
-    appliedDate: "2024-12-15",
-    status: "rejected",
-  },
-];
+// Jobs and applications will be loaded from database via API
 
 // ============================================================
 // MAIN COMPONENT
@@ -205,8 +80,15 @@ const APPLICATIONS: Application[] = [
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { t } = useI18n();
-  const [selectedJobId, setSelectedJobId] = useState<string>("1");
+  const [selectedJobId, setSelectedJobId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [selectedJobForApplication, setSelectedJobForApplication] = useState<Job | null>(null);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true);
+  const [selectedJobDetails, setSelectedJobDetails] = useState<JobDetails | null>(null);
 
   const userInitials =
     user?.fullName
@@ -215,6 +97,123 @@ export default function Dashboard() {
       .join("")
       .toUpperCase()
       .slice(0, 2) || "US";
+
+  // Load jobs from database on mount
+  useEffect(() => {
+    loadJobs();
+    loadApplications();
+  }, [user]);
+
+  const loadJobs = async () => {
+    setIsLoadingJobs(true);
+    try {
+      // Fetch all active jobs
+      const response = await fetch("/api/jobs?status=active");
+      
+      if (response.ok) {
+        const data = await response.json();
+        const jobsData = (data.jobs || []).map((job: any) => ({
+          id: job.id,
+          title: job.title,
+          company: job.companyName || "Company",
+          location: job.location,
+          salary: job.salary || "Not Specified",
+          posted: formatDate(job.postedDate),
+          type: job.type,
+          badge: job.category || undefined,
+        }));
+        setJobs(jobsData);
+        // Auto-select first job if available
+        if (jobsData.length > 0 && !selectedJobId) {
+          setSelectedJobId(jobsData[0].id);
+          loadJobDetails(jobsData[0].id);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading jobs:", error);
+    } finally {
+      setIsLoadingJobs(false);
+    }
+  };
+
+  const loadJobDetails = async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/jobs?id=${jobId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const job = data.job;
+        if (job) {
+          setSelectedJobDetails({
+            id: job.id,
+            title: job.title,
+            company: job.companyName || "Company",
+            companyVerified: true,
+            jobsPosted: 0,
+            location: job.location,
+            postedDate: formatDate(job.postedDate),
+            badge: job.category || undefined,
+            type: job.type,
+            deadline: job.deadline ? formatDate(job.deadline) : "Not specified",
+            vacancies: job.vacancies || 1,
+            education: job.education || "Not specified",
+            salary: job.salary || "Not Specified",
+            salaryType: (job.salaryType as "Monthly" | "Annual") || "Monthly",
+            experience: job.experience || "Not specified",
+            description: job.description || "No description available.",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error loading job details:", error);
+    }
+  };
+
+  const loadApplications = async () => {
+    if (!user?.id) {
+      setIsLoadingApplications(false);
+      return;
+    }
+    
+    setIsLoadingApplications(true);
+    try {
+      const response = await fetch(`/api/applications?applicantId=${user.id}`, {
+        headers: {
+          "x-user-id": user.id,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const appsData = (data.applications || []).map((app: any) => ({
+          id: app.id,
+          jobTitle: app.job?.title || "Unknown Job",
+          company: app.job?.companyName || "Unknown Company",
+          appliedDate: app.appliedAt,
+          status: app.status.toLowerCase() as "pending" | "reviewing" | "accepted" | "rejected",
+        }));
+        setApplications(appsData);
+      }
+    } catch (error) {
+      console.error("Error loading applications:", error);
+    } finally {
+      setIsLoadingApplications(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Recently";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString();
+  };
 
   // ============================================================
   // HELPER FUNCTIONS
@@ -249,13 +248,18 @@ export default function Dashboard() {
     }
   };
 
-  const filteredJobs = JOBS.filter(
+  const filteredJobs = jobs.filter(
     (job) =>
       job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.company.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const selectedJob = JOB_DETAILS[selectedJobId];
+  // Update job details when selection changes
+  useEffect(() => {
+    if (selectedJobId) {
+      loadJobDetails(selectedJobId);
+    }
+  }, [selectedJobId]);
 
   // ============================================================
   // RENDER
@@ -267,7 +271,7 @@ export default function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-black">{t.dashboard.welcome} - {t.roles.jobSeeker} {t.dashboard.dashboard}</h1>
+              <h1 className="text-3xl font-bold text-black">{t.dashboard.welcome} - {t.roles.jobSeeker} Dashboard</h1>
               <LanguageSwitcher />
             </div>
             <p className="text-gray-600 mt-1">
@@ -390,7 +394,29 @@ export default function Dashboard() {
 
               {/* JOB CARDS LIST */}
               <div className="space-y-4">
-                {filteredJobs.map((job) => (
+                {isLoadingJobs ? (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Loading jobs...</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : filteredJobs.length === 0 ? (
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="text-center py-12">
+                        <BriefcaseIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600 text-lg mb-2">No jobs available</p>
+                        <p className="text-gray-500 text-sm">
+                          Check back later for new job opportunities
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  filteredJobs.map((job) => (
                   <Card
                     key={job.id}
                     onClick={() => setSelectedJobId(job.id)}
@@ -416,7 +442,14 @@ export default function Dashboard() {
                           </div>
                           <p className="text-sm text-gray-600">{job.company}</p>
                         </div>
-                        <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-2 text-sm font-medium">
+                        <Button 
+                          className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-4 py-2 text-sm font-medium"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedJobForApplication(job);
+                            setShowApplicationForm(true);
+                          }}
+                        >
                           Apply
                         </Button>
                       </div>
@@ -437,7 +470,8 @@ export default function Dashboard() {
                       </p>
                     </CardContent>
                   </Card>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
@@ -447,7 +481,18 @@ export default function Dashboard() {
                 Your Applications
               </h2>
               <div className="space-y-3">
-                {APPLICATIONS.map((app) => (
+                {isLoadingApplications ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600 text-sm">Loading applications...</p>
+                  </div>
+                ) : applications.length === 0 ? (
+                  <div className="text-center py-8 border border-gray-200 rounded-lg">
+                    <p className="text-gray-600 text-sm">No applications yet</p>
+                    <p className="text-gray-500 text-xs mt-1">Apply to jobs to see your applications here</p>
+                  </div>
+                ) : (
+                  applications.map((app) => (
                   <div
                     key={app.id}
                     className="border border-gray-200 rounded-lg p-4"
@@ -472,7 +517,8 @@ export default function Dashboard() {
                       </Badge>
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -480,7 +526,7 @@ export default function Dashboard() {
           {/* ======== RIGHT SIDEBAR - JOB DETAILS & APPLICATIONS ======== */}
           <div className="space-y-6">
             {/* ======== JOB DETAILS PANEL ======== */}
-            {selectedJob && (
+            {selectedJobDetails && (
               <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-8">
                 {/* BACK BUTTON */}
                 <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-black mb-4">
@@ -493,15 +539,15 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h1 className="text-2xl font-bold text-black">
-                        {selectedJob.title}
+                        {selectedJobDetails.title}
                       </h1>
                       <p className="text-gray-600 text-sm mt-1">
-                        {selectedJob.type}
+                        {selectedJobDetails.type}
                       </p>
                     </div>
-                    {selectedJob.badge && (
+                    {selectedJobDetails.badge && (
                       <Badge className="bg-blue-100 text-blue-700 font-semibold px-3 py-1">
-                        {selectedJob.badge}
+                        {selectedJobDetails.badge}
                       </Badge>
                     )}
                   </div>
@@ -509,9 +555,9 @@ export default function Dashboard() {
                   {/* COMPANY INFO */}
                   <div className="flex items-center gap-1 text-sm">
                     <span className="font-semibold text-black">
-                      {selectedJob.company}
+                      {selectedJobDetails.company}
                     </span>
-                    {selectedJob.companyVerified && (
+                    {selectedJobDetails.companyVerified && (
                       <CheckCircleIcon className="w-4 h-4 text-blue-500" />
                     )}
                   </div>
@@ -523,14 +569,14 @@ export default function Dashboard() {
                   <div>
                     <p className="text-xs text-gray-600">Posted Date</p>
                     <p className="text-sm font-semibold text-black">
-                      {selectedJob.postedDate}
+                      {selectedJobDetails.postedDate}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600">Location</p>
                     <p className="text-sm font-semibold text-black flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
-                      {selectedJob.location}
+                      {selectedJobDetails.location}
                     </p>
                   </div>
                 </div>
@@ -541,7 +587,7 @@ export default function Dashboard() {
                   <div className="bg-gray-50 rounded-lg p-3">
                     <p className="text-xs text-gray-600 mb-1">Job Type</p>
                     <p className="text-sm font-semibold text-black">
-                      {selectedJob.type}
+                      {selectedJobDetails.type}
                     </p>
                   </div>
 
@@ -552,7 +598,7 @@ export default function Dashboard() {
                       Deadline
                     </p>
                     <p className="text-sm font-semibold text-black">
-                      {selectedJob.deadline}
+                      {selectedJobDetails.deadline}
                     </p>
                   </div>
 
@@ -563,7 +609,7 @@ export default function Dashboard() {
                       Vacancies
                     </p>
                     <p className="text-sm font-semibold text-black">
-                      {selectedJob.vacancies}
+                      {selectedJobDetails.vacancies}
                     </p>
                   </div>
 
@@ -574,7 +620,7 @@ export default function Dashboard() {
                       Education
                     </p>
                     <p className="text-sm font-semibold text-black">
-                      {selectedJob.education}
+                      {selectedJobDetails.education}
                     </p>
                   </div>
                 </div>
@@ -587,10 +633,10 @@ export default function Dashboard() {
                       Salary
                     </p>
                     <p className="text-sm font-bold text-black">
-                      {selectedJob.salary}
+                      {selectedJobDetails.salary}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {selectedJob.salaryType}
+                      {selectedJobDetails.salaryType}
                     </p>
                   </div>
                   <div>
@@ -599,14 +645,23 @@ export default function Dashboard() {
                       Experience
                     </p>
                     <p className="text-sm font-bold text-black">
-                      {selectedJob.experience}
+                      {selectedJobDetails.experience}
                     </p>
                     <p className="text-xs text-gray-500">Experience Level</p>
                   </div>
                 </div>
                 {/* ACTION BUTTONS */}
                 <div className="space-y-3 mb-6">
-                  <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full py-3 font-semibold">
+                  <Button 
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full py-3 font-semibold"
+                    onClick={() => {
+                      const job = jobs.find(j => j.id === selectedJobId);
+                      if (job) {
+                        setSelectedJobForApplication(job);
+                        setShowApplicationForm(true);
+                      }
+                    }}
+                  >
                     {t.dashboardStrings.applyNow}
                   </Button>
                   <div className="grid grid-cols-2 gap-3">
@@ -633,7 +688,7 @@ export default function Dashboard() {
                     Job Description
                   </h3>
                   <div className="text-sm text-gray-700 leading-relaxed space-y-3">
-                    {selectedJob.description.split("\n").map((line, idx) => (
+                    {selectedJobDetails.description.split("\n").map((line, idx) => (
                       <p key={idx}>{line}</p>
                     ))}
                   </div>
@@ -644,10 +699,10 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold text-black">
-                        {selectedJob.company}
+                        {selectedJobDetails.company}
                       </p>
                       <p className="text-xs text-gray-600">
-                        Jobs Posted: {selectedJob.jobsPosted} jobs
+                        Verified Company
                       </p>
                     </div>
                     <Button
@@ -669,7 +724,18 @@ export default function Dashboard() {
               </h2>
 
               <div className="space-y-3 max-h-96 overflow-y-auto">
-                {APPLICATIONS.map((app) => (
+                {isLoadingApplications ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                    <p className="text-gray-600 text-sm">Loading applications...</p>
+                  </div>
+                ) : applications.length === 0 ? (
+                  <div className="text-center py-8 border border-gray-200 rounded-lg">
+                    <p className="text-gray-600 text-sm">No applications yet</p>
+                    <p className="text-gray-500 text-xs mt-1">Apply to jobs to see your applications here</p>
+                  </div>
+                ) : (
+                  applications.map((app) => (
                   <div
                     key={app.id}
                     className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow"
@@ -695,21 +761,26 @@ export default function Dashboard() {
                       </Badge>
                     </div>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
 
               {/* STATS */}
               <div className="mt-4 pt-4 border-t border-gray-200 grid grid-cols-3 gap-3">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-orange-500">4</p>
+                  <p className="text-2xl font-bold text-orange-500">{applications.length}</p>
                   <p className="text-xs text-gray-600">Total Apps</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-green-500">1</p>
+                  <p className="text-2xl font-bold text-green-500">
+                    {applications.filter(a => a.status === "accepted").length}
+                  </p>
                   <p className="text-xs text-gray-600">Accepted</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-500">1</p>
+                  <p className="text-2xl font-bold text-blue-500">
+                    {applications.filter(a => a.status === "reviewing" || a.status === "pending").length}
+                  </p>
                   <p className="text-xs text-gray-600">Reviewing</p>
                 </div>
               </div>
@@ -717,6 +788,31 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Job Application Form Modal */}
+      {showApplicationForm && selectedJobForApplication && (
+        <JobApplicationForm
+          job={{
+            id: selectedJobForApplication.id,
+            title: selectedJobForApplication.title,
+            company: selectedJobForApplication.company,
+            companyName: selectedJobForApplication.company,
+            location: selectedJobForApplication.location,
+            salary: selectedJobForApplication.salary,
+            type: selectedJobForApplication.type,
+          }}
+          onClose={() => {
+            setShowApplicationForm(false);
+            setSelectedJobForApplication(null);
+          }}
+          onSuccess={() => {
+            // Handle successful application
+            setShowApplicationForm(false);
+            setSelectedJobForApplication(null);
+            loadApplications(); // Reload applications after successful submission
+          }}
+        />
+      )}
     </div>
   );
 }

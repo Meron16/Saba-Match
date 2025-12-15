@@ -40,6 +40,10 @@ export interface Translations {
     yes: string;
     no: string;
     all: string;
+    and: string;
+    manage: string;
+    available: string;
+    notAvailable: string;
   };
 
   // Auth
@@ -276,6 +280,21 @@ export interface Translations {
     profileUpdated: string;
     applicationSubmitted: string;
   };
+  
+  // Dashboard Strings
+  dashboardStrings: {
+    welcomeBack: string;
+    recruitmentJourney: string;
+    completeProfile: string;
+    completeProfileDesc: string;
+    searchForJob: string;
+    viewDetails: string;
+    applyNow: string;
+    allJobs: string;
+    savedJobs: string;
+    vacancy: string;
+    vacancies: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -348,7 +367,7 @@ export const translations: Record<Language, Translations> = {
       creatingAccount: "Creating Account...",
       signingIn: "Signing in...",
       accountType: "Account Type",
-      individualUser: "Individual User",
+      individualUser: "Girl/Woman Job Seeker",
       governmentUser: "Government User",
     },
     roles: {
@@ -359,7 +378,6 @@ export const translations: Record<Language, Translations> = {
     },
     dashboard: {
       welcome: "Welcome",
-      dashboard: "Dashboard",
       overview: "Overview",
       statistics: "Statistics",
       recentActivity: "Recent Activity",
@@ -457,56 +475,56 @@ export const translations: Record<Language, Translations> = {
     },
     home: {
       hero: {
-        title: "AI-Powered Recruitment",
-        subtitle: "Revolutionizing Talent Acquisition",
-        description: "Streamline your hiring process with our intelligent AI recruitment platform",
+        title: "Safe Digital Job Matching for Girls",
+        subtitle: "Empowering Women Through Remote Work",
+        description: "Connect with remote work opportunities from the safety of your home. Saba Match provides secure, verified job matching designed specifically for girls and women.",
         getStarted: "Get Started",
         learnMore: "Learn More",
-        findDreamJob: "Find Your Dream Job with",
-        activeJobs: "Active Jobs",
-        companies: "Companies",
-        jobSeekers: "Job Seekers",
+        findDreamJob: "Find Your Dream Remote Job with",
+        activeJobs: "Remote Jobs",
+        companies: "Verified Companies",
+        jobSeekers: "Girls & Women",
       },
       services: {
-        title: "Our Service",
-        subtitle: "Comprehensive recruitment solutions",
-        description: "We revolutionize talent acquisition with intelligent solutions designed to transform how you find, evaluate, and engage top candidates in today's competitive market.",
-        aiRecruitment: "AI-Powered Recruitment",
-        aiRecruitmentDesc: "Leverage advanced artificial intelligence to streamline your hiring process, identify top talent faster, and make data-driven decisions that transform your recruitment strategy.",
-        candidateIntelligence: "Candidate Intelligence",
-        candidateIntelligenceDesc: "Gain deep insights into candidate profiles with intelligent matching algorithms that evaluate skills, experience, and cultural fit with precision.",
-        engagementHub: "24/7 Engagement Hub",
-        engagementHubDesc: "Keep candidates engaged throughout the entire hiring journey with real-time communication, automated updates, and personalized interactions.",
+        title: "Our Services",
+        subtitle: "Safe & Secure Job Matching for Girls",
+        description: "Saba Match empowers girls and women with safe, verified remote work opportunities. Our platform prioritizes digital safety, privacy protection, and work-from-home flexibility to create a secure environment for professional growth.",
+        aiRecruitment: "Digital Safety First",
+        aiRecruitmentDesc: "Our platform is built with digital safety at its core. We verify all companies, protect your personal information, and ensure secure communication channels so you can apply with confidence from home.",
+        candidateIntelligence: "Remote Work Focus",
+        candidateIntelligenceDesc: "All opportunities are remote-friendly, allowing you to work from the safety and comfort of your home. No need to travel or meet in person until you're ready and comfortable.",
+        engagementHub: "Safe Communication",
+        engagementHubDesc: "Secure messaging and verified company profiles ensure your interactions remain safe and professional. We monitor and protect against harassment and inappropriate behavior.",
         keyFeatures: "Key Features",
-        resumeScreening: "Resume Screening",
-        resumeScreeningDesc: "Analyze and rank Candidates",
-        candidateMatching: "Candidate Matching",
-        candidateMatchingDesc: "Matches Skill and Preference",
-        interviewScheduling: "Interview Scheduling",
-        interviewSchedulingDesc: "Improve candidate Engagement",
+        resumeScreening: "Safe Profile Building",
+        resumeScreeningDesc: "Create your professional profile with privacy controls. Share only what you're comfortable with, and we protect your personal information.",
+        candidateMatching: "Smart Job Matching",
+        candidateMatchingDesc: "AI-powered matching connects you with opportunities that fit your skills, preferences, and remote work needs.",
+        interviewScheduling: "Virtual Interviews",
+        interviewSchedulingDesc: "Schedule and conduct interviews safely from home through our secure video platform with built-in safety features.",
       },
       about: {
-        title: "About AI HIRE",
-        description: "We are revolutionizing the recruitment industry by leveraging artificial intelligence to create seamless connections between talented professionals and innovative companies.",
+        title: "About Saba Match",
+        description: "Saba Match is a safe, secure platform designed specifically for girls and women to find remote work opportunities. We prioritize digital safety, privacy protection, and empowering women to build their careers from home.",
         mission: "Our Mission",
-        missionDesc1: "To eliminate bias in recruitment and make hiring faster, smarter, and more efficient. We believe every candidate deserves a fair chance and every company deserves to find the perfect match.",
-        missionDesc2: "Through our AI-powered platform, we are bridging the gap between talent and opportunity, creating a future where recruitment is transparent, data-driven, and human-centered.",
+        missionDesc1: "To create a safe digital space where girls and women can confidently apply for remote jobs without fear of harassment, discrimination, or safety concerns. We believe every girl deserves equal opportunities to build her career from the safety of her home.",
+        missionDesc2: "Through our secure platform, we're addressing Technology-Facilitated Gender-Based Violence (TFGBV) by providing verified companies, safe communication channels, and digital safety features that protect our users throughout their job search journey.",
         values: "Our Values",
-        innovation: "Innovation",
-        innovationDesc: "Constantly pushing boundaries with cutting-edge AI technology to solve real recruitment challenges.",
-        fairness: "Fairness",
-        fairnessDesc: "Committed to eliminating bias and ensuring equal opportunities for all candidates regardless of background.",
-        transparency: "Transparency",
-        transparencyDesc: "Building trust through clear processes, honest communication, and data-driven insights.",
-        poweredBy: "Powered by Advanced AI",
-        machineLearning: "Machine Learning",
-        machineLearningDesc: "Our algorithms learn from thousands of successful placements to improve matching accuracy over time.",
-        nlp: "Natural Language Processing",
-        nlpDesc: "Advanced NLP capabilities analyze resumes, job descriptions, and candidate profiles with human-level understanding.",
-        biasDetection: "Bias Detection",
-        biasDetectionDesc: "Built-in systems identify and eliminate unconscious bias to ensure fair evaluation of all candidates.",
-        predictiveAnalytics: "Predictive Analytics",
-        predictiveAnalyticsDesc: "Data-driven insights help companies make informed hiring decisions and predict candidate success.",
+        innovation: "Digital Safety Innovation",
+        innovationDesc: "We use cutting-edge technology to create innovative safety features including company verification, secure messaging, harassment detection, and privacy protection.",
+        fairness: "Gender Equality",
+        fairnessDesc: "Committed to eliminating gender bias and ensuring equal opportunities for girls and women. We actively work to create a bias-free matching system that values skills over gender.",
+        transparency: "Transparency & Trust",
+        transparencyDesc: "Building trust through transparent processes, verified company profiles, clear safety policies, and honest communication about how we protect your data and privacy.",
+        poweredBy: "Powered by Safety-First Technology",
+        machineLearning: "Safe Matching AI",
+        machineLearningDesc: "Our AI algorithms prioritize safety and match quality, learning from successful placements while filtering out potentially unsafe opportunities.",
+        nlp: "Privacy-Preserving Analysis",
+        nlpDesc: "Advanced technology analyzes your skills and preferences while protecting your personal information. Your data stays private and secure.",
+        biasDetection: "Harassment & Bias Detection",
+        biasDetectionDesc: "Built-in systems detect and prevent harassment, inappropriate behavior, and gender bias to ensure a safe environment for all users.",
+        predictiveAnalytics: "Safety Analytics",
+        predictiveAnalyticsDesc: "Data-driven insights help identify safe opportunities and protect users from potentially harmful situations while matching them with the best remote work options.",
       },
       contact: {
         title: "Get in Touch",
@@ -545,6 +563,10 @@ export const translations: Record<Language, Translations> = {
       searchForJob: "Search for job",
       viewDetails: "View Details",
       applyNow: "Apply Now",
+      allJobs: "All Jobs",
+      savedJobs: "Saved Jobs",
+      vacancy: "Vacancy",
+      vacancies: "Vacancies",
     },
   },
   am: {
@@ -616,7 +638,7 @@ export const translations: Record<Language, Translations> = {
       creatingAccount: "አካውንት በመፍጠር ላይ...",
       signingIn: "በመግባት ላይ...",
       accountType: "የአካውንት አይነት",
-      individualUser: "ግለሰብ ተጠቃሚ",
+      individualUser: "ሴት/ሴት ስራ ፈላጊ",
       governmentUser: "መንግስት ተጠቃሚ",
     },
     roles: {
@@ -627,7 +649,6 @@ export const translations: Record<Language, Translations> = {
     },
     dashboard: {
       welcome: "እንኳን ደህና መጣህ",
-      dashboard: "ዳሽቦርድ",
       overview: "አጠቃላይ እይታ",
       statistics: "ስታትስቲክስ",
       recentActivity: "የቅርብ ጊዜ እንቅስቃሴ",
@@ -725,56 +746,56 @@ export const translations: Record<Language, Translations> = {
     },
     home: {
       hero: {
-        title: "AI-መሰረት የስራ መመየጥ",
-        subtitle: "የችሎታ ማምራት አብዮት",
-        description: "የእኛን አስተዋይ AI የስራ መመየጥ መድረክ በመጠቀም የቅጥር ሂደትዎን ቀለል አድርግ",
+        title: "ለሴቶች ደህንነት ያለው ዲጂታል የስራ መዛመጃ",
+        subtitle: "ሴቶችን በሩቁ ስራ በማበረታታት",
+        description: "ከቤትዎ ደህንነት ጋር ሩቅ የስራ እድሎችን ያገናኙ። ሳባ ማች ለሴቶች እና ሴቶች የተዘጋጀ ደህንነት ያለው፣ የተረጋገጠ የስራ መዛመጃ መድረክ ያቀርባል።",
         getStarted: "ጀምር",
         learnMore: "ተጨማሪ ይመልከቱ",
-        findDreamJob: "የእርስዎን ሕልም ስራ ያግኙ",
-        activeJobs: "ንቁ ስራዎች",
-        companies: "ኩባንያዎች",
-        jobSeekers: "ስራ ፈላጊዎች",
+        findDreamJob: "የእርስዎን ሕልም ሩቅ ስራ ያግኙ",
+        activeJobs: "ሩቅ ስራዎች",
+        companies: "የተረጋገጡ ኩባንያዎች",
+        jobSeekers: "ሴቶች እና ሴቶች",
       },
       services: {
         title: "አገልግሎቶቻችን",
-        subtitle: "ሁሉም የስራ መመየጥ መፍትሄዎች",
-        description: "አስተዋይ መፍትሄዎችን በመጠቀም የችሎታ ማምራትን እናሻሽላለን እና በዛሬው ውድድር የገበያ ላይ ከፍተኛ መመየጫዎችን እንዴት ማግኘት፣ መገምገም እና መሳተፍ እንደሚቀየር እናዘጋጃለን።",
-        aiRecruitment: "AI-መሰረት የስራ መመየጥ",
-        aiRecruitmentDesc: "የእርስዎን የቅጥር ሂደት ለማመቻቸት፣ ከፍተኛ ችሎታ ያላቸውን በፍጥነት ለመለየት እና የስራ መመየጥ ስትራቴጂዎን የሚቀይሩ በውሂብ የተመሰረቱ ውሳኔዎችን ለማድረግ የላቀ ሰው ሰራሽ አእምሮን ይጠቀሙ።",
-        candidateIntelligence: "መመየጫ አእምሮ",
-        candidateIntelligenceDesc: "ችሎታዎች፣ እውቀት እና የባህል ተመጣጣኝነትን በትክክል የሚገምግሙ አስተዋይ የመዛመጃ ስልተ-ቀመሮች በመጠቀም ስለ መመየጫዎች ጥልቅ ግንዛቤዎችን ያግኙ።",
-        engagementHub: "24/7 መሳተፍ ማዕከል",
-        engagementHubDesc: "በትዕዛዝ ኮምዩኒኬሽን፣ በራስ-ሰር ዝመናዎች እና በእንግዳዊ ግንኙነቶች በጠቅላላው የቅጥር ጉዞ ወቅት መመየጫዎችን ይቀላቀሉ።",
+        subtitle: "ለሴቶች ደህንነት ያለው እና ደህንነት ያለው የስራ መዛመጃ",
+        description: "ሳባ ማች ሴቶችን እና ሴቶችን ደህንነት ያለው፣ የተረጋገጠ ሩቅ የስራ እድሎች ያቀርባል። መድረካችን ዲጂታል ደህንነት፣ የግላዊነት ጥበቃ እና ከቤት ስራ ተለዋዋጭነትን ያስቀድማል ለሴቶች ደህንነት ያለው ሁኔታ ለሙያዊ እድገት ለመፍጠር።",
+        aiRecruitment: "ዲጂታል ደህንነት በመጀመሪያ",
+        aiRecruitmentDesc: "መድረካችን ዲጂታል ደህንነትን በመሠረቱ ተገንብቷል። ሁሉንም ኩባንያዎች እናረጋግጣለን፣ የግላዊ መረጃዎን እንጠብቃለን እና ደህንነት ያለው የግንኙነት ሰርጦችን እናረጋግጣለን ከቤትዎ በአስተማማኝነት ለመመዘግብ ይችላሉ።",
+        candidateIntelligence: "ሩቅ ስራ ትኩረት",
+        candidateIntelligenceDesc: "ሁሉም እድሎች ሩቅ-ጓደኛ ናቸው፣ ከቤትዎ ደህንነት እና አመቺነት ለመሥራት ያስችልዎታል። መጓዝ ወይም በአካል መገናኘት አያስፈልግም እስከሚደርሱ እና ምቹ እስከሚሆኑ ድረስ።",
+        engagementHub: "ደህንነት ያለው ግንኙነት",
+        engagementHubDesc: "ደህንነት ያለው መልዕክት ማስተላለፍ እና የተረጋገጡ የኩባንያ መገለጫዎች ግንኙነቶችዎ ደህንነት ያለው እና ሙያዊ እንዲሆኑ ያረጋግጣሉ። አስጸያፊ እና ተገቢ ያልሆነ ባህሪን እንከታተላለን እና እንጠብቃለን።",
         keyFeatures: "ዋና ባህሪያት",
-        resumeScreening: "CV ማጣራት",
-        resumeScreeningDesc: "መመየጫዎችን ይገምግሙ እና ይዘርዝሩ",
-        candidateMatching: "መመየጫ መዛመጃ",
-        candidateMatchingDesc: "ችሎታ እና ምርጫ ይዛመዳል",
-        interviewScheduling: "የቃለ-መጠይቅ ማስተካከያ",
-        interviewSchedulingDesc: "የመመየጫ መሳተፍን ያሻሽሉ",
+        resumeScreening: "ደህንነት ያለው መገለጫ ግንባታ",
+        resumeScreeningDesc: "የግላዊነት መቆጣጠሪያዎች ጋር ሙያዊ መገለጫዎን ይፍጠሩ። በአስተማማኝነት ምን ማጋራት እንደሚፈልጉ ይምረጡ፣ እና የግላዊ መረጃዎን እንጠብቃለን።",
+        candidateMatching: "አስተዋይ የስራ መዛመጃ",
+        candidateMatchingDesc: "ችሎታዎችዎን፣ ምርጫዎችዎን እና ሩቅ የስራ ፍላጎቶችዎን የሚያሟሉ እድሎችን የሚያገናኝ በAI የተመሰረተ መዛመጃ።",
+        interviewScheduling: "ምናባዊ ቃለ-መጠይቆች",
+        interviewSchedulingDesc: "ከቤትዎ በአስተማማኝነት በአስተማማኝ የቪዲዮ መድረካችን በተገነቡ ደህንነት ባህሪያት ቃለ-መጠይቆችን ያስተካክሉ እና ያካሂዱ።",
       },
       about: {
-        title: "ስለ AI HIRE",
-        description: "የችሎታ ያላቸውን ሙያዎች እና የፈጠራ ኩባንያዎችን መካከል ለማመቻቸት ሰው ሰራሽ አእምሮን በመጠቀም የስራ መመየጥ ኢንዱስትሪን እናሻሽላለን።",
+        title: "ስለ ሳባ ማች",
+        description: "ሳባ ማች ሴቶች እና ሴቶች ሩቅ የስራ እድሎችን ለማግኘት የተዘጋጀ ደህንነት ያለው፣ ደህንነት ያለው መድረክ ነው። ዲጂታል ደህንነት፣ የግላዊነት ጥበቃ እና ሴቶችን ከቤት ሙያዊ ሥራ ለመገንባት እናስቀድማለን።",
         mission: "የእኛ ተልእኮ",
-        missionDesc1: "በስራ መመየጥ ውስጥ አድሎዎን ለማስወገድ እና ቅጥርን ፈጣን፣ አስተዋይ እና ውጤታማ ለማድረግ። እያንዳንዱ መመየጫ ፍትሃዊ እድል ሊያገኝ ይገባል እና እያንዳንዱ ኩባንያ ፍጹም መዛመጃ ሊያገኝ ይገባል እናም እናምናለን።",
-        missionDesc2: "በእኛ AI-መሰረት መድረክ በኩል፣ በችሎታ እና በእድል መካከል ያለውን ክፍተት እንዘግባለን፣ የስራ መመየጥ ግልጽ፣ በውሂብ የተመሰረተ እና የሰው ልጅ-ማዕከላዊ የሆነ ወደፊት እንፈጥራለን።",
+        missionDesc1: "ሴቶች እና ሴቶች አስጸያፊ ባህሪ፣ አድሎዎ ወይም ደህንነት ስጋቶች ሳይጨነቁ በአስተማማኝነት ሩቅ ስራዎችን ለመመዘግብ የሚችሉበት ደህንነት ያለው ዲጂታል ቦታ ለመፍጠር። እያንዳንዱ ሴት ከቤትዋ ደህንነት ጋር ሙያዊ ሥራዋን ለመገንባት እኩል እድል ሊያገኝ ይገባል እናም እናምናለን።",
+        missionDesc2: "በአስተማማኝ መድረካችን በኩል፣ የቴክኖሎጂ-ተጎሳቆለ የጾታ ላይ የተመሰረተ ጥቃት (TFGBV) እያነጋገርን እንደሆነ በማረጋገጥ ኩባንያዎች፣ ደህንነት ያለው የግንኙነት ሰርጦች እና በሙሉ የስራ ፍለጋ ጉዞዎ ወቅት አጠቃቀሞችን የሚጠብቁ ዲጂታል ደህንነት ባህሪያት እናቀርባለን።",
         values: "የእኛ እሴቶች",
-        innovation: "ፈጠራ",
-        innovationDesc: "እውነተኛ የስራ መመየጥ ተግዳሮቶችን ለመፍታት የላቀ AI ቴክኖሎጂ በመጠቀም ሁልጊዜ ወሰኖችን በመጫን ላይ።",
-        fairness: "አቀናበር",
-        fairnessDesc: "አድሎዎን ለማስወገድ እና የመመየጫዎችን ሁሉ እኩልነት ለማረጋገጥ ቁርጠኛ ነን የዘመናቸውን አመጣጥ ምንም አይነት።",
-        transparency: "ግልጽነት",
-        transparencyDesc: "ግልጽ ሂደቶች፣ ሚጋራ የግንኙነት እና በውሂብ የተመሰረቱ ግንዛቤዎችን በመጠቀም እምነትን እንገነባለን።",
-        poweredBy: "የላቀ AI ያቀሳቅሰው",
-        machineLearning: "የማሽን ትምህርት",
-        machineLearningDesc: "የእኛ ስልተ-ቀመሮች ከሺህ የተሳኩ አቀማመጦች ይማራሉ የጊዜ ሂደት የመዛመጃ ትክክለኛነትን ለማሻሻል።",
-        nlp: "የተፈጥሮ ቋንቋ ሂደት",
-        nlpDesc: "የላቀ NLP ችሎታዎች CVዎች፣ የስራ መግለጫዎች እና የመመየጫ መገለጫዎችን ከሰው የሚመዘገብ ግንዛቤ ጋር ይገምግማሉ።",
-        biasDetection: "አድሎዎ ማግኘት",
-        biasDetectionDesc: "የተገነቡ ስርዓቶች የማያውቁ አድሎዎችን ይለያሉ እና ያስወግዳሉ ሁሉንም መመየጫዎችን ፍትሃዊ ለመገምገም።",
-        predictiveAnalytics: "የንግድ ትንቢት ትንታኔ",
-        predictiveAnalyticsDesc: "በውሂብ የተመሰረቱ ግንዛቤዎች ኩባንያዎችን ማስተዋየት ውሳኔዎችን ለማድረግ እና የመመየጫ ስኬትን ለመተንበይ ይረዳሉ።",
+        innovation: "ዲጂታል ደህንነት ፈጠራ",
+        innovationDesc: "ኩባንያ ማረጋገጥ፣ ደህንነት ያለው መልዕክት ማስተላለፍ፣ አስጸያፊ ባህሪ ማግኘት እና የግላዊነት ጥበቃን ጨምሮ የፈጠራ ደህንነት ባህሪያትን ለመፍጠር የላቀ ቴክኖሎጂን እንጠቀማለን።",
+        fairness: "የጾታ እኩልነት",
+        fairnessDesc: "የጾታ አድሎዎን ለማስወገድ እና ሴቶች እና ሴቶች እኩል እድሎችን ለማረጋገጥ ቁርጠኛ ነን። ችሎታዎችን ከጾታ በላይ የሚያስቀድም የመዛመጃ ስርዓት ለመፍጠር በንቃት እንሠራለን።",
+        transparency: "ግልጽነት እና እምነት",
+        transparencyDesc: "ግልጽ ሂደቶች፣ የተረጋገጡ የኩባንያ መገለጫዎች፣ ግልጽ የደህንነት ፖሊሲዎች እና ውሂብዎን እና የግላዊነትዎን እንዴት እንጠብቃለን በተመለከተ ሚጋራ ግንኙነት በመገንባት እምነትን እንገነባለን።",
+        poweredBy: "በደህንነት-መጀመሪያ ቴክኖሎጂ የተመራ",
+        machineLearning: "ደህንነት ያለው የመዛመጃ AI",
+        machineLearningDesc: "የእኛ AI ስልተ-ቀመሮች ደህንነትን እና የመዛመጃ ጥራትን ያስቀድማሉ፣ ከተሳኩ አቀማመጦች በመማር በተመሳሳይ ጊዜ በአቅም አልባ አደጋ ውስጥ የሚገቡ እድሎችን ያጣራሉ።",
+        nlp: "የግላዊነት ጥበቃ ትንተና",
+        nlpDesc: "የላቀ ቴክኖሎጂ ችሎታዎችዎን እና ምርጫዎችዎን ይገምግማል በተመሳሳይ ጊዜ የግላዊ መረጃዎን ይጠብቃል። ውሂብዎ የግላዊ እና ደህንነት ያለው ይቆያል።",
+        biasDetection: "አስጸያፊ ባህሪ እና አድሎዎ ማግኘት",
+        biasDetectionDesc: "የተገነቡ ስርዓቶች አስጸያፊ ባህሪ፣ ተገቢ ያልሆነ ባህሪ እና የጾታ አድሎዎን ይለያሉ እና ይከለክላሉ ለሁሉም ተጠቃሚዎች ደህንነት ያለው ሁኔታ ለማረጋገጥ።",
+        predictiveAnalytics: "ደህንነት ትንታኔ",
+        predictiveAnalyticsDesc: "በውሂብ የተመሰረቱ ግንዛቤዎች ደህንነት ያላቸውን እድሎችን ለመለየት እና በአቅም አልባ አደጋ ውስጥ የሚገቡ ሁኔታዎችን ለመከላከል ረዳት ሲሆኑ በተመሳሳይ ጊዜ ከፍተኛውን ሩቅ የስራ አማራጮችን ያዛምዳሉ።",
       },
       contact: {
         title: "እውቂያ",

@@ -29,7 +29,7 @@ export default function Hero() {
             <div className="space-y-4">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
                 {t.home.hero.findDreamJob}{" "}
-                <span className="text-orange-500">AI HIRE</span>
+                <span className="text-orange-500">Saba Match</span>
               </h1>
               <p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl">
                 {t.home.hero.description}

@@ -17,8 +17,8 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-1">
           <span className="text-2xl font-bold">
-            <span className="text-orange-500">AI</span>
-            <span className="text-black"> HIRE</span>
+            <span className="text-orange-500">Saba</span>
+            <span className="text-black"> Match</span>
           </span>
         </Link>
 

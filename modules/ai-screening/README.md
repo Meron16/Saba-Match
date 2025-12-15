@@ -1,6 +1,6 @@
 # Module 4: AI Resume Screening Engine
 
-This module provides AI-powered resume analysis and candidate ranking for the AI Recruiter platform.
+This module provides AI-powered resume analysis and candidate ranking for the Saba Match platform, a safe job matching platform for girls and women.
 
 ## Overview
 

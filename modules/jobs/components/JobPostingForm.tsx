@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/Components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
-import { jobService } from "@/lib/services/jobService";
+// jobService removed - using API routes instead
 import { Job } from "@/lib/services/jobService";
 import { X, Save, FileText } from "lucide-react";
 import { useI18n } from "@/lib/i18n/context";
@@ -42,8 +42,9 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
   const [regions, setRegions] = useState<string[]>([]);
 
   useEffect(() => {
-    setCategories(jobService.getCategories());
-    setRegions(jobService.getRegions());
+    // Categories and regions - can be fetched from API if needed
+    setCategories(["Technology", "Healthcare", "Finance", "Education", "Engineering", "Marketing", "Sales", "Human Resources", "Operations", "Other"]);
+    setRegions(["Addis Ababa", "Dire Dawa", "Mekelle", "Gondar", "Awassa", "Bahir Dar", "Dessie", "Jimma", "Jijiga", "Shashamane", "Other"]);
     
     if (job) {
       setFormData({
@@ -105,23 +106,7 @@ export default function JobPostingForm({ job, onClose, onSuccess }: JobPostingFo
         const result = await response.json();
         const savedJob = result.job;
         
-        // Save job to localStorage on client side (API runs server-side)
-        if (savedJob && typeof window !== "undefined") {
-          try {
-            const allJobs = jobService.getAllJobs();
-            // Check if job already exists (for updates)
-            const existingIndex = allJobs.findIndex(j => j.id === savedJob.id);
-            if (existingIndex >= 0) {
-              allJobs[existingIndex] = savedJob;
-            } else {
-              allJobs.push(savedJob);
-            }
-            jobService.saveJobs(allJobs);
-          } catch (error) {
-            console.error("Error saving job to localStorage:", error);
-          }
-        }
-        
+        // Job is saved to database via API, no need for localStorage
         onSuccess(savedJob?.id);
         onClose();
       } else {

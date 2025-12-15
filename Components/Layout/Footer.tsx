@@ -17,8 +17,8 @@ export function Footer() {
             {/* Logo */}
             <div>
               <span className="text-lg font-bold">
-                <span className="text-orange-500">AI</span>
-                <span className="text-white"> HIRE</span>
+                <span className="text-orange-500">Saba</span>
+                <span className="text-white"> Match</span>
               </span>
             </div>
 
@@ -60,7 +60,7 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="border-t border-gray-800 mt-6 pt-4 flex flex-col md:flex-row justify-between items-center gap-2">
-          <p className="text-gray-400 text-xs">© 2025 AI HIRE. {t.common.all} {t.common.view} {t.common.all}</p>
+          <p className="text-gray-400 text-xs">© 2025 Saba Match. {t.common.all} {t.common.view} {t.common.all}</p>
           <div className="flex gap-4 text-xs">
             <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
               {t.profile.personalInfo} {t.profile.personalInfo}

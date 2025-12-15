@@ -8,8 +8,8 @@ import { I18nProvider } from "@/lib/i18n/context"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "AI HIRE - Revolutionizing Recruitment",
-  description: "AI-Powered Solution to streamline recruitment",
+  title: "Saba Match - Empowering Girls Through Safe Digital Job Matching",
+  description: "A safe, secure platform connecting girls and women with remote work opportunities. Apply from home with confidence and digital safety protection.",
 
 }
 

@@ -11,7 +11,7 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
-const LANGUAGE_STORAGE_KEY = "airecruiter_language";
+const LANGUAGE_STORAGE_KEY = "sabamatch_language";
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   // Always start with "en" to avoid hydration mismatch

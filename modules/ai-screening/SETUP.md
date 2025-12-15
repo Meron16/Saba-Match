@@ -110,4 +110,3 @@ Typical screening costs:
 
 Monitor usage in OpenAI dashboard to control costs.
 
-

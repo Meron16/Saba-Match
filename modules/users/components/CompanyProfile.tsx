@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import { Button } from "@/Components/ui/button";
 import { Badge } from "@/Components/ui/badge";
+import VerificationSystem from "@/Components/Company/VerificationSystem";
+import PaymentSubscription from "@/Components/Company/PaymentSubscription";
 import {
   Building2,
   Phone,
@@ -51,6 +53,7 @@ export default function CompanyProfile() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [activeSection, setActiveSection] = useState<"profile" | "verification" | "payment">("profile");
 
   const [profile, setProfile] = useState<CompanyProfileData | null>(null);
   const [formData, setFormData] = useState({
@@ -260,33 +263,76 @@ export default function CompanyProfile() {
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-900">Company Profile</h1>
         <div className="flex gap-2">
-          {isEditing ? (
+          {activeSection === "profile" && (
             <>
-              <Button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="bg-orange-500 hover:bg-orange-600"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-              <Button onClick={() => setIsEditing(false)} variant="outline">
-                <X className="w-4 h-4 mr-2" />
-                Cancel
-              </Button>
+              {isEditing ? (
+                <>
+                  <Button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="bg-orange-500 hover:bg-orange-600"
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    {isSaving ? "Saving..." : "Save"}
+                  </Button>
+                  <Button onClick={() => setIsEditing(false)} variant="outline">
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={() => setIsEditing(true)} variant="outline">
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Profile
+                </Button>
+              )}
             </>
-          ) : (
-            <Button onClick={() => setIsEditing(true)} variant="outline">
-              <Edit className="w-4 h-4 mr-2" />
-              Edit Profile
-            </Button>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Profile Section */}
-        <div className="lg:col-span-2 space-y-6">
+      {/* Section Tabs */}
+      <div className="mb-6 flex gap-2 border-b border-gray-200">
+        <button
+          onClick={() => setActiveSection("profile")}
+          className={`pb-3 px-4 text-sm font-medium transition ${
+            activeSection === "profile"
+              ? "text-orange-500 border-b-2 border-orange-500"
+              : "text-gray-600 hover:text-black"
+          }`}
+        >
+          <Building2 className="w-4 h-4 inline mr-2" />
+          Profile
+        </button>
+        <button
+          onClick={() => setActiveSection("verification")}
+          className={`pb-3 px-4 text-sm font-medium transition ${
+            activeSection === "verification"
+              ? "text-orange-500 border-b-2 border-orange-500"
+              : "text-gray-600 hover:text-black"
+          }`}
+        >
+          <Shield className="w-4 h-4 inline mr-2" />
+          Verification
+        </button>
+        <button
+          onClick={() => setActiveSection("payment")}
+          className={`pb-3 px-4 text-sm font-medium transition ${
+            activeSection === "payment"
+              ? "text-orange-500 border-b-2 border-orange-500"
+              : "text-gray-600 hover:text-black"
+          }`}
+        >
+          <CreditCard className="w-4 h-4 inline mr-2" />
+          Subscription
+        </button>
+      </div>
+
+      {/* Profile Section */}
+      {activeSection === "profile" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Profile Section */}
+          <div className="lg:col-span-2 space-y-6">
           {/* Company Information */}
           <Card>
             <CardHeader>
@@ -602,11 +648,19 @@ export default function CompanyProfile() {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setActiveSection("payment")}
+              >
                 <CreditCard className="w-4 h-4 mr-2" />
                 Manage Subscription
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => setActiveSection("verification")}
+              >
                 <Shield className="w-4 h-4 mr-2" />
                 Request Verification
               </Button>
@@ -614,6 +668,40 @@ export default function CompanyProfile() {
           </Card>
         </div>
       </div>
+      )}
+
+      {/* Verification Section */}
+      {activeSection === "verification" && (
+        <div>
+          <VerificationSystem
+            currentStatus={{
+              status: profile?.verificationStatus || "NOT_STARTED",
+              submittedAt: profile?.verifiedAt,
+              verifiedAt: profile?.verificationStatus === "VERIFIED" ? profile?.verifiedAt : undefined,
+              documents: {
+                businessLicense: profile?.businessLicenseUrl,
+              },
+            }}
+            onStatusChange={(status) => {
+              // Frontend only - handle status change
+              console.log("Verification status changed:", status);
+            }}
+          />
+        </div>
+      )}
+
+      {/* Payment/Subscription Section */}
+      {activeSection === "payment" && (
+        <div>
+          <PaymentSubscription
+            currentPlan={profile?.subscriptionStatus || "FREE"}
+            onPlanSelect={(planId) => {
+              // Frontend only - update local state
+              console.log("Plan selected:", planId);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

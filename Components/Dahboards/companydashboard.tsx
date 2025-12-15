@@ -6,11 +6,13 @@ import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/Components/ui/badge";
 import { Button } from "@/Components/ui/button";
 import { Card, CardContent } from "@/Components/ui/card";
-import { JobPostingForm, JobListing, jobService, Job } from "@/modules/jobs";
+import { JobPostingForm, JobListing, Job } from "@/modules/jobs";
 import { ScreeningResults } from "@/modules/ai-screening";
 import type { CandidateScore } from "@/lib/ai/types";
 import { useI18n } from "@/lib/i18n/context";
 import { LanguageSwitcher } from "@/Components/ui/language-switcher";
+import PaymentSubscription from "@/Components/Company/PaymentSubscription";
+import VerificationSystem from "@/Components/Company/VerificationSystem";
 import {
   BriefcaseIcon,
   Users,
@@ -44,35 +46,7 @@ interface Application {
   status: "pending" | "reviewing" | "accepted" | "rejected";
 }
 
-// ============================================================
-// SAMPLE DATA (Applications - will be replaced with real data later)
-// ============================================================
-const APPLICATIONS: Application[] = [
-  {
-    id: "1",
-    jobTitle: "Operation manager for furniture company",
-    applicantName: "John Doe",
-    applicantEmail: "john@example.com",
-    appliedDate: "2025-01-15",
-    status: "reviewing",
-  },
-  {
-    id: "2",
-    jobTitle: "Senior Frontend Developer",
-    applicantName: "Jane Smith",
-    applicantEmail: "jane@example.com",
-    appliedDate: "2025-01-14",
-    status: "pending",
-  },
-  {
-    id: "3",
-    jobTitle: "Product Manager",
-    applicantName: "Bob Johnson",
-    applicantEmail: "bob@example.com",
-    appliedDate: "2025-01-13",
-    status: "accepted",
-  },
-];
+// Applications will be loaded from database via API
 
 // ============================================================
 // MAIN COMPONENT
@@ -81,7 +55,7 @@ export default function CompanyDashboard() {
   const { user, logout } = useAuth();
   const { t } = useI18n();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTab, setSelectedTab] = useState<"jobs" | "applications" | "screening">("jobs");
+  const [selectedTab, setSelectedTab] = useState<"jobs" | "applications" | "screening" | "payment" | "verification">("jobs");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showJobForm, setShowJobForm] = useState(false);
@@ -90,22 +64,34 @@ export default function CompanyDashboard() {
   const [selectedJobForScreening, setSelectedJobForScreening] = useState<string>("");
   const [screeningResults, setScreeningResults] = useState<CandidateScore[]>([]);
   const [isScreening, setIsScreening] = useState(false);
+  const [currentSubscription, setCurrentSubscription] = useState<"FREE" | "BASIC" | "PREMIUM" | "ENTERPRISE">("FREE");
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [isLoadingApplications, setIsLoadingApplications] = useState(false);
 
-  // Load jobs from localStorage on mount
+  // Load jobs from database via API on mount
   useEffect(() => {
     loadJobs();
+    loadApplications();
   }, [user]);
 
-  const loadJobs = () => {
+  const loadJobs = async () => {
     if (!user?.id) return;
     
     setIsLoading(true);
     try {
-      const companyJobs = jobService.getJobsByCompany(user.id);
-      setJobs(companyJobs);
-      // Auto-select first job for screening if available
-      if (companyJobs.length > 0 && !selectedJobForScreening) {
-        setSelectedJobForScreening(companyJobs[0].id);
+      const response = await fetch(`/api/jobs?companyId=${user.id}`, {
+        headers: {
+          "x-user-id": user.id,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setJobs(data.jobs || []);
+        // Auto-select first job for screening if available
+        if (data.jobs && data.jobs.length > 0 && !selectedJobForScreening) {
+          setSelectedJobForScreening(data.jobs[0].id);
+        }
       }
     } catch (error) {
       console.error("Error loading jobs:", error);
@@ -113,6 +99,55 @@ export default function CompanyDashboard() {
       setIsLoading(false);
     }
   };
+
+  const loadApplications = async () => {
+    if (!user?.id || jobs.length === 0) {
+      setIsLoadingApplications(false);
+      return;
+    }
+    
+    setIsLoadingApplications(true);
+    try {
+      // Fetch applications for all company jobs
+      const allApplications: Application[] = [];
+      
+      for (const job of jobs) {
+        const response = await fetch(`/api/applications?jobId=${job.id}`, {
+          headers: {
+            "x-user-id": user.id,
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.applications) {
+            const jobApplications = data.applications.map((app: any) => ({
+              id: app.id,
+              jobTitle: app.job?.title || job.title,
+              applicantName: app.applicant?.fullName || "Unknown",
+              applicantEmail: app.applicant?.email || "",
+              appliedDate: app.appliedAt,
+              status: app.status.toLowerCase() as "pending" | "reviewing" | "accepted" | "rejected",
+            }));
+            allApplications.push(...jobApplications);
+          }
+        }
+      }
+      
+      setApplications(allApplications);
+    } catch (error) {
+      console.error("Error loading applications:", error);
+    } finally {
+      setIsLoadingApplications(false);
+    }
+  };
+
+  // Reload applications when jobs change
+  useEffect(() => {
+    if (jobs.length > 0) {
+      loadApplications();
+    }
+  }, [jobs.length]);
 
   // Auto-screen applications when screening tab is selected
   useEffect(() => {
@@ -138,12 +173,8 @@ export default function CompanyDashboard() {
         if (data.rankings && data.rankings.length > 0) {
           setScreeningResults(data.rankings);
         } else {
-          // If no applications found for this job, use test mode for demonstration
-          const testResponse = await fetch("/api/ai/screen?test=true");
-          if (testResponse.ok) {
-            const testData = await testResponse.json();
-            setScreeningResults(testData.rankings || []);
-          }
+          // No applications found for this job
+          setScreeningResults([]);
         }
       } else {
         // If request fails (no applications), use test mode for demonstration
@@ -289,7 +320,7 @@ export default function CompanyDashboard() {
     return matchesSearch && matchesStatus;
   });
 
-  const filteredApplications = APPLICATIONS.filter(
+  const filteredApplications = applications.filter(
     (app) =>
       app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
       app.applicantName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -307,11 +338,11 @@ export default function CompanyDashboard() {
   const totalJobs = jobs.length;
   const activeJobs = jobs.filter((j) => j.status === "active" && j.isActive).length;
   const draftJobs = jobs.filter((j) => j.status === "draft").length;
-  const totalApplications = APPLICATIONS.length;
-  const pendingApplications = APPLICATIONS.filter(
+  const totalApplications = applications.length;
+  const pendingApplications = applications.filter(
     (app) => app.status === "pending" || app.status === "reviewing"
   ).length;
-  const acceptedApplications = APPLICATIONS.filter(
+  const acceptedApplications = applications.filter(
     (app) => app.status === "accepted"
   ).length;
 
@@ -325,11 +356,11 @@ export default function CompanyDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold text-black">{t.dashboard.welcome} - {t.roles.company} {t.dashboard.dashboard}</h1>
+              <h1 className="text-3xl font-bold text-black">{t.dashboard.welcome} - {t.roles.company} Dashboard</h1>
               <LanguageSwitcher />
             </div>
             <p className="text-gray-600 mt-1">
-              {t.dashboard.postedJobs} {t.common.and} {t.dashboard.applications} {t.common.manage}
+              {t.dashboard.postedJobs} and {t.dashboard.applications} management
             </p>
           </div>
 
@@ -390,25 +421,31 @@ export default function CompanyDashboard() {
               </Link>
             </div>
             <div className="mt-6 grid grid-cols-3 gap-4 pt-6 border-t border-orange-200">
-              <div className="text-center">
+              <button
+                onClick={() => setSelectedTab("verification")}
+                className="text-center hover:bg-orange-50 p-2 rounded-lg transition"
+              >
                 <Shield className="w-6 h-6 text-orange-500 mx-auto mb-2" />
                 <p className="text-sm font-semibold text-gray-900">
                   Verification
                 </p>
                 <p className="text-xs text-gray-600">Get verified</p>
-              </div>
-              <div className="text-center">
+              </button>
+              <button
+                onClick={() => setSelectedTab("payment")}
+                className="text-center hover:bg-orange-50 p-2 rounded-lg transition"
+              >
                 <CreditCard className="w-6 h-6 text-orange-500 mx-auto mb-2" />
                 <p className="text-sm font-semibold text-gray-900">
                   Subscription
                 </p>
                 <p className="text-xs text-gray-600">Manage plan</p>
-              </div>
-              <div className="text-center">
+              </button>
+              <Link href="/profile" className="text-center hover:bg-orange-50 p-2 rounded-lg transition">
                 <FileText className="w-6 h-6 text-orange-500 mx-auto mb-2" />
                 <p className="text-sm font-semibold text-gray-900">Documents</p>
                 <p className="text-xs text-gray-600">Upload docs</p>
-              </div>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -450,7 +487,7 @@ export default function CompanyDashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">{t.applications.pending} {t.common.view}</p>
+                  <p className="text-sm text-gray-600 mb-1">{t.applications.pending} applications</p>
                   <p className="text-2xl font-bold text-black">
                     {pendingApplications}
                   </p>
@@ -478,10 +515,10 @@ export default function CompanyDashboard() {
         {/* ======== TABS ======== */}
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
-            <div className="flex gap-4 border-b border-gray-200">
+            <div className="flex gap-4 border-b border-gray-200 overflow-x-auto">
               <button
                 onClick={() => setSelectedTab("jobs")}
-                className={`pb-3 px-4 text-sm font-medium transition ${
+                className={`pb-3 px-4 text-sm font-medium transition whitespace-nowrap ${
                   selectedTab === "jobs"
                     ? "text-orange-500 border-b-2 border-orange-500"
                     : "text-gray-600 hover:text-black"
@@ -491,7 +528,7 @@ export default function CompanyDashboard() {
               </button>
               <button
                 onClick={() => setSelectedTab("applications")}
-                className={`pb-3 px-4 text-sm font-medium transition ${
+                className={`pb-3 px-4 text-sm font-medium transition whitespace-nowrap ${
                   selectedTab === "applications"
                     ? "text-orange-500 border-b-2 border-orange-500"
                     : "text-gray-600 hover:text-black"
@@ -501,13 +538,35 @@ export default function CompanyDashboard() {
               </button>
               <button
                 onClick={() => setSelectedTab("screening")}
-                className={`pb-3 px-4 text-sm font-medium transition ${
+                className={`pb-3 px-4 text-sm font-medium transition whitespace-nowrap ${
                   selectedTab === "screening"
                     ? "text-orange-500 border-b-2 border-orange-500"
                     : "text-gray-600 hover:text-black"
                 }`}
               >
                 {t.dashboard.aiScreening}
+              </button>
+              <button
+                onClick={() => setSelectedTab("payment")}
+                className={`pb-3 px-4 text-sm font-medium transition whitespace-nowrap ${
+                  selectedTab === "payment"
+                    ? "text-orange-500 border-b-2 border-orange-500"
+                    : "text-gray-600 hover:text-black"
+                }`}
+              >
+                <CreditCard className="w-4 h-4 inline mr-1" />
+                Subscription
+              </button>
+              <button
+                onClick={() => setSelectedTab("verification")}
+                className={`pb-3 px-4 text-sm font-medium transition whitespace-nowrap ${
+                  selectedTab === "verification"
+                    ? "text-orange-500 border-b-2 border-orange-500"
+                    : "text-gray-600 hover:text-black"
+                }`}
+              >
+                <Shield className="w-4 h-4 inline mr-1" />
+                Verification
               </button>
             </div>
             <Button
@@ -599,7 +658,29 @@ export default function CompanyDashboard() {
           {/* APPLICATIONS TAB */}
           {selectedTab === "applications" && (
             <div className="space-y-4">
-              {filteredApplications.map((app) => (
+              {isLoadingApplications ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                      <p className="text-gray-600">Loading applications...</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : filteredApplications.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center py-12">
+                      <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600 text-lg mb-2">No applications found</p>
+                      <p className="text-gray-500 text-sm">
+                        Applications will appear here when candidates apply to your jobs
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredApplications.map((app) => (
                 <Card key={app.id} className="hover:shadow-lg transition-all">
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between mb-3">
@@ -640,7 +721,8 @@ export default function CompanyDashboard() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              )}
             </div>
           )}
 
@@ -652,9 +734,9 @@ export default function CompanyDashboard() {
                   <CardContent className="pt-6">
                     <div className="text-center py-12">
                       <BriefcaseIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 text-lg mb-2">{t.jobs.title} {t.common.notAvailable}</p>
+                      <p className="text-gray-600 text-lg mb-2">No {t.jobs.title} available</p>
                       <p className="text-gray-500 text-sm">
-                        {t.jobs.postNewJob} {t.common.view} {t.screening.title} {t.dashboard.candidates}
+                        {t.jobs.postNewJob} to view {t.screening.title} {t.dashboard.candidates}
                       </p>
                     </div>
                   </CardContent>
@@ -727,7 +809,7 @@ export default function CompanyDashboard() {
                               averageScore: Math.round(screeningResults.reduce((sum, r) => sum + r.overallScore, 0) / screeningResults.length),
                               topScore: Math.max(...screeningResults.map(r => r.overallScore)),
                               lowestScore: Math.min(...screeningResults.map(r => r.overallScore))
-                            } : null}
+                            } : undefined}
                           />
                         </div>
                       ) : (
@@ -737,7 +819,7 @@ export default function CompanyDashboard() {
                               <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                               <p className="text-gray-600 text-lg mb-2">{t.screening.noCandidates}</p>
                               <p className="text-gray-500 text-sm mb-4">
-                                {t.applications.title} {t.common.all} {t.common.and} {t.screening.title} {t.common.view} {t.common.and} {t.screening.title}
+                                {t.applications.title} and {t.screening.title}
                               </p>
                               <Button
                                 onClick={() => screenApplicationsForJob(selectedJobForScreening)}
@@ -759,9 +841,9 @@ export default function CompanyDashboard() {
                       <CardContent className="pt-6">
                         <div className="text-center py-12">
                           <BriefcaseIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-600 text-lg mb-2">{t.jobs.title} {t.common.notAvailable}</p>
+                          <p className="text-gray-600 text-lg mb-2">No {t.jobs.title} available</p>
                           <p className="text-gray-500 text-sm mb-4">
-                            {t.jobs.postNewJob} {t.common.view} {t.screening.title} {t.dashboard.candidates}
+                            {t.jobs.postNewJob} to view {t.screening.title} {t.dashboard.candidates}
                           </p>
                           <Button
                             onClick={() => {
@@ -779,6 +861,41 @@ export default function CompanyDashboard() {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* PAYMENT/SUBSCRIPTION TAB */}
+          {selectedTab === "payment" && (
+            <div>
+              <PaymentSubscription
+                currentPlan={currentSubscription}
+                onPlanSelect={(planId) => {
+                  // Frontend only - update local state
+                  const planMap: Record<string, "FREE" | "BASIC" | "PREMIUM" | "ENTERPRISE"> = {
+                    free: "FREE",
+                    basic: "BASIC",
+                    premium: "PREMIUM",
+                    enterprise: "ENTERPRISE",
+                  };
+                  setCurrentSubscription(planMap[planId] || "FREE");
+                }}
+              />
+            </div>
+          )}
+
+          {/* VERIFICATION TAB */}
+          {selectedTab === "verification" && (
+            <div>
+              <VerificationSystem
+                currentStatus={{
+                  status: "NOT_STARTED",
+                  documents: {},
+                }}
+                onStatusChange={(status) => {
+                  // Frontend only - handle status change
+                  console.log("Verification status changed:", status);
+                }}
+              />
             </div>
           )}
         </div>

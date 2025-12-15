@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jobService, Job } from "@/lib/services/jobService";
+import { jobService } from "@/lib/services/jobService";
 import { jobPostingSchema, jobUpdateSchema, jobSearchSchema } from "@/lib/validators/job-validators";
 import { prisma } from "@/lib/prisma";
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     
     if (jobId) {
       // Get single job by ID
-      const job = jobService.getJobById(jobId);
+      const job = await jobService.getJobById(jobId);
       if (!job) {
         return NextResponse.json({ error: "Job not found" }, { status: 404 });
       }
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     
     if (companyId) {
       // Get all jobs for a specific company
-      const jobs = jobService.getJobsByCompany(companyId);
+      const jobs = await jobService.getJobsByCompany(companyId);
       return NextResponse.json({ jobs }, { status: 200 });
     }
     
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     };
     
     const validatedFilters = jobSearchSchema.parse(filters);
-    const jobs = jobService.searchJobs(
+    const jobs = await jobService.searchJobs(
       validatedFilters.query || "",
       {
         category: validatedFilters.category,
@@ -80,49 +80,28 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = jobPostingSchema.parse(body);
     
-    // Get company name from user profile (for now, use userId as companyId)
-    // In a real app, you'd fetch this from the user's company profile
-    const companyName = body.companyName || "Company";
+    // Get company name from user profile
+    let companyName = body.companyName || "Company";
+    try {
+      const companyProfile = await prisma.companyProfile.findUnique({
+        where: { userId },
+        select: { companyName: true },
+      });
+      if (companyProfile) {
+        companyName = companyProfile.companyName;
+      }
+    } catch (error) {
+      console.error("Error fetching company profile:", error);
+    }
     
-    // Create job object (client will save to localStorage)
-    const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const now = new Date().toISOString();
-    const newJob: Job = {
+    // Create job using jobService (saves to database)
+    const newJob = await jobService.createJob({
       ...validatedData,
-      id: jobId,
       companyId: userId,
       companyName,
-      postedDate: now,
-      createdAt: now,
-      updatedAt: now,
       isActive: validatedData.status === "active",
-    };
-    
-    // Save to Prisma database for applications matching
-    try {
-      await prisma.job.create({
-        data: {
-          id: jobId,
-          title: validatedData.title,
-          description: validatedData.description,
-          companyId: userId,
-          location: validatedData.location || "",
-          salary: validatedData.salary || null,
-          salaryType: validatedData.salaryType || null,
-          type: validatedData.type || "Full Time",
-          requirements: validatedData.requirements || null,
-          education: validatedData.education || null,
-          experience: validatedData.experience || null,
-          vacancies: validatedData.vacancies || 1,
-          deadline: validatedData.deadline ? new Date(validatedData.deadline) : null,
-          isActive: validatedData.status === "active",
-          postedDate: new Date(now),
-        },
-      });
-    } catch (dbError) {
-      console.error("Error saving job to database:", dbError);
-      // Continue - client will save to localStorage
-    }
+      status: validatedData.status || "active",
+    });
     
     return NextResponse.json({ job: newJob }, { status: 201 });
   } catch (error: any) {
@@ -157,7 +136,7 @@ export async function PATCH(request: NextRequest) {
     }
     
     // Verify job belongs to user
-    const existingJob = jobService.getJobById(id);
+    const existingJob = await jobService.getJobById(id);
     if (!existingJob) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
@@ -167,37 +146,10 @@ export async function PATCH(request: NextRequest) {
     }
     
     const validatedData = jobUpdateSchema.parse(updates);
-    const updatedJob = jobService.updateJob(id, validatedData);
+    const updatedJob = await jobService.updateJob(id, validatedData);
     
     if (!updatedJob) {
       return NextResponse.json({ error: "Failed to update job" }, { status: 500 });
-    }
-    
-    // Also update in Prisma database
-    try {
-      const dbUpdateData: any = {};
-      if (validatedData.title !== undefined) dbUpdateData.title = validatedData.title;
-      if (validatedData.description !== undefined) dbUpdateData.description = validatedData.description;
-      if (validatedData.location !== undefined) dbUpdateData.location = validatedData.location;
-      if (validatedData.salary !== undefined) dbUpdateData.salary = validatedData.salary;
-      if (validatedData.salaryType !== undefined) dbUpdateData.salaryType = validatedData.salaryType;
-      if (validatedData.type !== undefined) dbUpdateData.type = validatedData.type;
-      if (validatedData.requirements !== undefined) dbUpdateData.requirements = validatedData.requirements;
-      if (validatedData.education !== undefined) dbUpdateData.education = validatedData.education;
-      if (validatedData.experience !== undefined) dbUpdateData.experience = validatedData.experience;
-      if (validatedData.vacancies !== undefined) dbUpdateData.vacancies = validatedData.vacancies;
-      if (validatedData.deadline !== undefined) dbUpdateData.deadline = validatedData.deadline ? new Date(validatedData.deadline) : null;
-      if (validatedData.status !== undefined) dbUpdateData.isActive = validatedData.status === "active";
-      
-      if (Object.keys(dbUpdateData).length > 0) {
-        await prisma.job.update({
-          where: { id },
-          data: dbUpdateData,
-        });
-      }
-    } catch (dbError) {
-      console.error("Error updating job in database:", dbError);
-      // Continue even if database update fails
     }
     
     return NextResponse.json({ job: updatedJob }, { status: 200 });
@@ -233,7 +185,7 @@ export async function DELETE(request: NextRequest) {
     }
     
     // Verify job belongs to user
-    const existingJob = jobService.getJobById(jobId);
+    const existingJob = await jobService.getJobById(jobId);
     if (!existingJob) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
@@ -242,20 +194,10 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized to delete this job" }, { status: 403 });
     }
     
-    const deleted = jobService.deleteJob(jobId);
+    const deleted = await jobService.deleteJob(jobId);
     
     if (!deleted) {
       return NextResponse.json({ error: "Failed to delete job" }, { status: 500 });
-    }
-    
-    // Also delete from Prisma database
-    try {
-      await prisma.job.delete({
-        where: { id: jobId },
-      });
-    } catch (dbError) {
-      console.error("Error deleting job from database:", dbError);
-      // Continue even if database delete fails
     }
     
     return NextResponse.json({ message: "Job deleted successfully" }, { status: 200 });

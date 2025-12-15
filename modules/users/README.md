@@ -1,6 +1,6 @@
 # Module 2: User Management & Profiles
 
-This module handles user profile management for all stakeholder types in the AI Recruiter platform.
+This module handles user profile management for all stakeholder types in the Saba Match platform, with special focus on safety and privacy for girls and women job seekers.
 
 ## Overview
 

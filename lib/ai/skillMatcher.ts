@@ -158,7 +158,7 @@ async function analyzeMatchWithAI(
     
     const ai = await getOpenAI();
     
-    const prompt = `You are an AI recruiter assistant. Analyze how well a candidate matches a job position.
+    const prompt = `You are an AI job matching assistant for Saba Match, a safe platform connecting girls and women with remote work opportunities. Analyze how well a candidate matches a job position, focusing on skills and qualifications while ensuring bias-free evaluation.
 
 Job Position:
 Title: ${jobRequirements.title}
