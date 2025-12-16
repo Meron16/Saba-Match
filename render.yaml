@@ -1,0 +1,13 @@
+# Render Blueprint for PostgreSQL Database
+# This file is used to provision a PostgreSQL database on Render
+# Note: You can also create the database manually through the Render dashboard
+
+services:
+  - type: pspg
+    name: airecruiter-db
+    plan: free  # Change to 'starter' or 'standard' for production
+    databaseName: airecruiter
+    user: airecruiter_user
+    # Note: Render will auto-generate the DATABASE_URL connection string
+    # You'll need to copy this from the Render dashboard after creation
+
